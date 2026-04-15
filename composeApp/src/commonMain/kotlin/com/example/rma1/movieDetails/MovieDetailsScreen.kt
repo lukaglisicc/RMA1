@@ -66,25 +66,82 @@ private fun MovieDetailsScreen(
 ) {
 
     if (state.isLoading){
-        Box(
+        Column(
             modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center,
         ) {
-            CircularProgressIndicator()
+            IconButton(
+                onClick = onClose,
+                modifier = Modifier
+                    .padding(horizontal = 8.dp, vertical = 40.dp)
+                    .background(
+                        color = Color.Black.copy(alpha = 0.5f),
+                        shape = CircleShape
+                    )
+            ) {
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    tint = Color.White,
+                )
+            }
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator()
+            }
         }
     } else if (state.error != null) {
-        Box(
+        Column(
             modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center,
         ) {
-            Text(text = "Error: ${state.error.message}")
+            IconButton(
+                onClick = onClose,
+                modifier = Modifier
+                    .padding(horizontal = 8.dp, vertical = 40.dp)
+                    .background(
+                        color = Color.Black.copy(alpha = 0.5f),
+                        shape = CircleShape
+                    )
+            ) {
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    tint = Color.White,
+                )
+            }
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(text = "Error: ${state.error.message}")
+            }
         }
     } else if (state.movieDetailsFull == null) {
-        Box(
+        Column(
             modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center,
         ) {
-            Text(text = "No movies details.")
+            IconButton(
+                onClick = onClose,
+                modifier = Modifier
+                    .padding(horizontal = 8.dp, vertical = 40.dp)
+                    .background(
+                        color = Color.Black.copy(alpha = 0.5f),
+                        shape = CircleShape
+                    )
+            ) {
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    tint = Color.White,
+                )
+            }
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(text = "No movies details.")
+            }
         }
     } else {
         MovieDetailsScreen(
