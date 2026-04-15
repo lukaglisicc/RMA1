@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -15,11 +16,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ListItem
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import coil3.compose.AsyncImage
 import com.example.rma1.movies.Movie
+import com.example.rma1.movies.MovieRepository
 
 @Composable
 fun MainScreen(
@@ -31,6 +38,7 @@ fun MainScreen(
     MainScreen(
         state = state,
         onMovieClick = onMovieClick,
+        eventPublisher = viewModel::setEvent,
     )
 }
 
@@ -39,16 +47,61 @@ fun MainScreen(
 private fun MainScreen(
     state: MainContract.UiState,
     onMovieClick: (movieId: String) -> Unit,
+    eventPublisher: (MainContract.UiEvent) -> Unit,
 ) {
 
     val scrollState = rememberScrollState()
+    var isSortExpanded by remember {mutableStateOf(false)}
+
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(text = "Premiere")
-                },
-            )
+            Column {
+                TopAppBar(
+                    title = {
+                        Text(text = "Premiere")
+                    },
+                )
+                Box{
+                    Button(
+                        onClick = { isSortExpanded = true },
+                    ){
+                        Text("Sort")
+                    }
+                    DropdownMenu(
+                        expanded = isSortExpanded,
+                        onDismissRequest = { isSortExpanded = false },
+                    ) {
+                        DropdownMenuItem(
+                            text = {Text("Rating")},
+                            onClick = {
+                                isSortExpanded = false
+                                eventPublisher(MainContract.UiEvent.sortMovies(MovieRepository.sortType.RATING))
+                            },
+                        )
+                        DropdownMenuItem(
+                            text = {Text("Popularity")},
+                            onClick = {
+                                isSortExpanded = false
+                                eventPublisher(MainContract.UiEvent.sortMovies(MovieRepository.sortType.POPULARITY))
+                            },
+                        )
+                        DropdownMenuItem(
+                            text = {Text("Year")},
+                            onClick = {
+                                isSortExpanded = false
+                                eventPublisher(MainContract.UiEvent.sortMovies(MovieRepository.sortType.YEAR))
+                            },
+                        )
+                        DropdownMenuItem(
+                            text = {Text("Title")},
+                            onClick = {
+                                isSortExpanded = false
+                                eventPublisher(MainContract.UiEvent.sortMovies(MovieRepository.sortType.TITLE, "asc"))
+                            },
+                        )
+                    }
+                }
+            }
         },
         content = { paddingValues ->
             Column(

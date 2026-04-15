@@ -8,20 +8,29 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import com.example.rma1.movies.MovieRepository
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlin.time.Duration.Companion.seconds
 
 class MainViewModel (
     private val movieRepository: MovieRepository
 ) : ViewModel() {
 
+    //UI State flow
     private val _state = MutableStateFlow(MainContract.UiState())
     val state = _state.asStateFlow()
     private fun setState(reducer: MainContract.UiState.() -> MainContract.UiState){
         _state.getAndUpdate(reducer)
     }
 
+    //UI Event flow
+    private val events = MutableSharedFlow<MainContract.UiEvent>()
+    fun setEvent(event: MainContract.UiEvent){
+        viewModelScope.launch { events.emit(event) }
+    }
+
     init {
         observeMovies()
+        observeEvents()
     }
 
     private fun observeMovies() {
@@ -40,11 +49,26 @@ class MainViewModel (
         }
     }
 
-    private fun test(){
+    private fun observeEvents(){
         viewModelScope.launch {
-            delay(2.seconds)
-            movieRepository.queryMovies(pageSize = 100)
+            events.collect { event ->
+                when(event){
+                    is MainContract.UiEvent.sortMovies -> {
+                        sortMovies(event.sortBy, event.order)
+                    }
+                }
+            }
         }
+    }
+
+    private fun sortMovies(
+        sortType: MovieRepository.sortType,
+        order: String,
+    ){
+        movieRepository.setQueryParams(
+            sortBy = sortType,
+            sortOrder = order,
+        )
     }
 
 

@@ -20,6 +20,15 @@ import kotlin.Int
 
 class NetworkMovieRepository : MovieRepository{
 
+    private var pageSize: Int = 30
+    private var sortBy: MovieRepository.sortType = MovieRepository.sortType.RATING
+    private var sortOrder: String = "desc"
+    private var genreId: Int? = null
+    private var query: String? = null
+    private var minYear: Int? = null
+    private var maxYear: Int? = null
+    private var minRating: Float? = null
+
     enum class ImageType(val id: Int){
         POSTER(1),
         BACKDROP(2),
@@ -54,19 +63,48 @@ class NetworkMovieRepository : MovieRepository{
 
 
     override fun observeMovies(): Flow<MoviesState> = _movies.asStateFlow()
-    override fun queryMovies(
-        pageSize: Int,
-        sortBy: String,
-        sortOrder: String,
+
+    override fun setQueryParams(
+        pageSize: Int?,
+        sortBy: MovieRepository.sortType?,
+        sortOrder: String?,
         genreId: Int?,
         query: String?,
         minYear: Int?,
         maxYear: Int?,
         minRating: Float?
     ) {
+        pageSize?.let { this.pageSize = it }
+        sortBy?.let { this.sortBy = it }
+        sortOrder?.let { this.sortOrder = it }
+        genreId?.let { this.genreId = it }
+        query?.let { this.query = it }
+        minYear?.let { this.minYear = it }
+        maxYear?.let { this.maxYear = it }
+        minRating?.let { this.minRating = it }
+        queryMovies()
+    }
+
+    override fun resetQueryParams() {
+        pageSize = 30
+        genreId = null
+        query = null
+        minYear = null
+        maxYear = null
+        minRating = null
+        queryMovies()
+    }
+
+    override fun resetQuerySort() {
+        sortBy = MovieRepository.sortType.RATING
+        sortOrder = "desc"
+        queryMovies()
+    }
+
+    override fun queryMovies() {
         loadMovies(
             pageSize = pageSize,
-            sortBy = sortBy,
+            sortBy = mapSort(sortBy),
             sortOrder = sortOrder,
             genreId = genreId,
             query = query,
@@ -193,6 +231,15 @@ class NetworkMovieRepository : MovieRepository{
                     profilePath = getImageUrl(cast.profilePath, 1, ImageType.PROFILE)
                 )
             }
+    }
+
+    private fun mapSort(sortType: MovieRepository.sortType) : String{
+        return when(sortType){
+            MovieRepository.sortType.RATING -> "imdb_rating"
+            MovieRepository.sortType.POPULARITY -> "popularity"
+            MovieRepository.sortType.YEAR -> "year"
+            MovieRepository.sortType.TITLE -> "title"
+        }
     }
 
 }
