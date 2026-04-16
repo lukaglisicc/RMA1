@@ -385,7 +385,9 @@ private fun ActorsSection(cast: List<Cast>){
 }
 
 private fun budgetFormat(budget: Int): String{
-    if(budget >= 1_000_000){
+    if(budget >= 1_000_000_000){
+        return "\$${budget / 1000_000_000}B"
+    }else if(budget >= 1_000_000){
         return "\$${budget / 1_000_000}M"
     } else {
         return "\$${budget / 1000},${budget % 1000}"

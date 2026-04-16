@@ -15,6 +15,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -204,10 +205,26 @@ private fun MovieListItem(
             Text(text = movie.title)
         },
         supportingContent = {
-            Text(movie.year.toString())
+            Column{
+                Text(movie.year.toString())
+                Row{
+                    movie.genres.forEach { genre ->
+                        Card(
+                            Modifier
+                                .padding(2.dp)
+                        ){
+                            Text(
+                                text = genre.name,
+                                Modifier
+                                    .padding(4.dp)
+                            )
+                        }
+                    }
+                }
+            }
         },
         trailingContent = {
-            Text(movie.rating.toString())
+            Text("⭐${(movie.rating)}  ${(formatVotes(movie.votes))} votes")
         },
         leadingContent = {
             AsyncImage(
@@ -216,4 +233,16 @@ private fun MovieListItem(
             )
         }
     )
+}
+
+private fun formatVotes(votes: Int): String{
+    return if(votes >= 1_000_000_000){
+        "${votes / 1000_000_000}B"
+    }else if(votes >= 1_000_000){
+        "${votes / 1_000_000}M"
+    } else if (votes >= 1_000){
+        "${votes / 1000}K"
+    } else {
+        votes.toString()
+    }
 }
