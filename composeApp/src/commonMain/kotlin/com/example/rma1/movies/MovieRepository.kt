@@ -12,7 +12,7 @@ interface MovieRepository {
     }
 
     data class MoviesState(
-        val movies: List<Movie> = emptyList(),
+        val movieResponse: MovieResponse? = null,
         val isLoading: Boolean = true,
         val error: Throwable? = null,
     )

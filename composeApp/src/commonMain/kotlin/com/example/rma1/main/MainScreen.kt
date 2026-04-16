@@ -5,7 +5,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
@@ -104,80 +106,93 @@ private fun MainScreen(
                         }
                     },
                 )
-                Box(
-                    modifier = Modifier.padding(horizontal = 16.dp)
+                Row (
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
                 ){
-                    Button(
-                        onClick = { isSortExpanded = true },
-                    ){
-                        Text("Sort")
+                    Box{
+                        Button(
+                            onClick = { isSortExpanded = true },
+                        ){
+                            Text("Sort")
+                        }
+                        DropdownMenu(
+                            expanded = isSortExpanded,
+                            onDismissRequest = { isSortExpanded = false },
+                        ) {
+                            DropdownMenuItem(
+                                text = {Text("Rating")},
+                                onClick = {
+                                    isSortExpanded = false
+                                    eventPublisher(MainContract.UiEvent.SortMovies(MovieRepository.SortType.RATING))
+                                },
+                            )
+                            DropdownMenuItem(
+                                text = {Text("Popularity")},
+                                onClick = {
+                                    isSortExpanded = false
+                                    eventPublisher(MainContract.UiEvent.SortMovies(MovieRepository.SortType.POPULARITY))
+                                },
+                            )
+                            DropdownMenuItem(
+                                text = {Text("Year")},
+                                onClick = {
+                                    isSortExpanded = false
+                                    eventPublisher(MainContract.UiEvent.SortMovies(MovieRepository.SortType.YEAR))
+                                },
+                            )
+                            DropdownMenuItem(
+                                text = {Text("Title")},
+                                onClick = {
+                                    isSortExpanded = false
+                                    eventPublisher(MainContract.UiEvent.SortMovies(MovieRepository.SortType.TITLE, "asc"))
+                                },
+                            )
+                        }
                     }
-                    DropdownMenu(
-                        expanded = isSortExpanded,
-                        onDismissRequest = { isSortExpanded = false },
-                    ) {
-                        DropdownMenuItem(
-                            text = {Text("Rating")},
-                            onClick = {
-                                isSortExpanded = false
-                                eventPublisher(MainContract.UiEvent.sortMovies(MovieRepository.SortType.RATING))
-                            },
-                        )
-                        DropdownMenuItem(
-                            text = {Text("Popularity")},
-                            onClick = {
-                                isSortExpanded = false
-                                eventPublisher(MainContract.UiEvent.sortMovies(MovieRepository.SortType.POPULARITY))
-                            },
-                        )
-                        DropdownMenuItem(
-                            text = {Text("Year")},
-                            onClick = {
-                                isSortExpanded = false
-                                eventPublisher(MainContract.UiEvent.sortMovies(MovieRepository.SortType.YEAR))
-                            },
-                        )
-                        DropdownMenuItem(
-                            text = {Text("Title")},
-                            onClick = {
-                                isSortExpanded = false
-                                eventPublisher(MainContract.UiEvent.sortMovies(MovieRepository.SortType.TITLE, "asc"))
-                            },
-                        )
-                    }
+                    Text("${((state.movieResponse?.totalItems ?: 0).toString())} movies")
                 }
             }
         },
         content = { paddingValues ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .verticalScroll(state = scrollState)
-            ) {
-                if (state.isLoading){
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        CircularProgressIndicator()
-                    }
-                } else if (state.error != null) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(text = "Error: ${state.error.message}")
-                    }
-                } else if (state.movies.isEmpty()) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Text(text = "No movies that match filters.")
-                    }
-                } else {
-                    state.movies.forEach { movie ->
+            if (state.isLoading){
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else if (state.error != null) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(text = "Error: ${state.error.message}")
+                }
+            } else if (state.movieResponse?.items?.isEmpty() ?: true) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text(text = "No movies that match filters.")
+                }
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .verticalScroll(state = scrollState)
+                ) {
+                    state.movieResponse.items.forEach { movie ->
                         MovieListItem(
                             movie = movie,
                             onClick = {onMovieClick(movie.id)}
@@ -185,7 +200,6 @@ private fun MainScreen(
                     }
                 }
             }
-
         }
     )
 }
@@ -207,7 +221,11 @@ private fun MovieListItem(
         supportingContent = {
             Column{
                 Text(movie.year.toString())
-                Row{
+                Text(
+                    text = "⭐${(movie.rating)}  ${(formatVotes(movie.votes))} votes",
+                    style = MaterialTheme.typography.labelSmall,
+                )
+                FlowRow {
                     movie.genres.forEach { genre ->
                         Card(
                             Modifier
@@ -216,20 +234,19 @@ private fun MovieListItem(
                             Text(
                                 text = genre.name,
                                 Modifier
-                                    .padding(4.dp)
+                                    .padding(2.dp),
+                                style = MaterialTheme.typography.labelSmall,
                             )
                         }
                     }
                 }
             }
         },
-        trailingContent = {
-            Text("⭐${(movie.rating)}  ${(formatVotes(movie.votes))} votes")
-        },
         leadingContent = {
             AsyncImage(
                 model = movie.posterPath,
                 contentDescription = null,
+                modifier = Modifier.fillMaxHeight(),
             )
         }
     )

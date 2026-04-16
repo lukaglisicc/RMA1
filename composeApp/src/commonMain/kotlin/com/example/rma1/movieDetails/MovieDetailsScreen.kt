@@ -369,7 +369,10 @@ private fun ActorsSection(cast: List<Cast>){
         Text("CAST", style = MaterialTheme.typography.titleMedium)
         Spacer(Modifier.height(8.dp))
         cast.forEach { cast ->
-            Row {
+            Row (
+                Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ){
                 AsyncImage(
                     model = cast.profilePath,
                     contentDescription = null,
@@ -378,7 +381,10 @@ private fun ActorsSection(cast: List<Cast>){
                         .padding(4.dp)
                         .clip(RoundedCornerShape(8.dp))
                 )
-                Text(text = cast.name)
+                Text(
+                    text = cast.name,
+                    style = MaterialTheme.typography.titleMedium,
+                )
             }
         }
     }

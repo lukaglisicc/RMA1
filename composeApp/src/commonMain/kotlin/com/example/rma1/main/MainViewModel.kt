@@ -45,7 +45,7 @@ class MainViewModel (
                 .collect { moviesState ->
                     setState {
                         this.copy(
-                            movies = moviesState.movies,
+                            movieResponse = moviesState.movieResponse,
                             isLoading = moviesState.isLoading,
                             error = moviesState.error,
                         )
@@ -75,7 +75,7 @@ class MainViewModel (
         viewModelScope.launch {
             events.collect { event ->
                 when(event){
-                    is MainContract.UiEvent.sortMovies -> {
+                    is MainContract.UiEvent.SortMovies -> {
                         sortMovies(event.sortBy, event.order)
                     }
                 }

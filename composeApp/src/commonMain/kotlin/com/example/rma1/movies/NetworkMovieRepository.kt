@@ -127,7 +127,7 @@ class NetworkMovieRepository : MovieRepository{
             )
         }
         try {
-            val movies = getMovies(
+            val movieResponse = getMovies(
                 pageSize = pageSize,
                 sortBy = sortBy,
                 sortOrder = sortOrder,
@@ -139,7 +139,7 @@ class NetworkMovieRepository : MovieRepository{
             )
             _movies.update {
                 it.copy(
-                    movies = movies,
+                    movieResponse = movieResponse,
                     isLoading = false,
                 )
             }
@@ -162,8 +162,8 @@ class NetworkMovieRepository : MovieRepository{
         minYear: Int? = null,
         maxYear: Int? = null,
         minRating: Float? = null
-    ): List<Movie> {
-        return api.getMovies(
+    ): MovieResponse {
+        var response = api.getMovies(
             pageSize = pageSize,
             sortBy = sortBy,
             sortOrder = sortOrder,
@@ -173,12 +173,16 @@ class NetworkMovieRepository : MovieRepository{
             maxYear = maxYear,
             minRating = minRating,
         )
-            .items
-            .map{ movie ->
-                movie.copy(
-                    posterPath = getImageUrl(movie.posterPath, 1)
-                )
-            }
+        response = response.copy(
+            items = response
+                .items
+                .map{ movie ->
+                    movie.copy(
+                        posterPath = getImageUrl(movie.posterPath, 1)
+                    )
+                }
+        )
+        return response
     }
 
     private fun updateFilters(){
