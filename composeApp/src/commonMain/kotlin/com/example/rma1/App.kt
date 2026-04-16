@@ -7,6 +7,6 @@ import androidx.compose.ui.tooling.preview.Preview
 @Preview
 fun App() {
     Navigation(
-        startDestination = "com/example/rma1/main"
+        startDestination = "main"
     )
 }

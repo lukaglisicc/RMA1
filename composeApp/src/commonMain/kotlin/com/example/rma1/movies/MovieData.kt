@@ -85,6 +85,7 @@ data class MovieDetailsFull(
     val movieDetails: MovieDetails,
     val imagePaths: List<String>,
     val cast: List<Cast>,
+    val trailerPath: String,
 )
 
 @Serializable
@@ -95,4 +96,27 @@ data class MovieImage(
 @Serializable
 data class Backdrops(
     val backdrops: List<MovieImage>
+)
+
+data class Filters(
+    val genreId: Int? = null,
+    val query: String? = null,
+    val minYear: Int? = 1920,
+    val maxYear: Int? = 2025,
+    val minRating: Float? = 0F,
+)
+
+fun Filters.appliedFilters() : Int {
+    var i = 0
+    if (this.query != null) i++
+    if (this.genreId != null) i++
+    if (this.minYear != 1920) i++
+    if (this.maxYear != 2025) i++
+    if (this.minRating != 0F) i++
+    return i
+}
+
+@Serializable
+data class Trailer (
+    val key: String,
 )

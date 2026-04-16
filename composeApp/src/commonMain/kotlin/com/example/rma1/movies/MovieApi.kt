@@ -40,4 +40,9 @@ interface MovieApi {
     suspend fun getMovieImages(
         @Path("id") id: String
     ): Backdrops
+
+    @GET("movies/{id}/videos?type=Trailer")
+    suspend fun getMovieTrailers(
+        @Path("id") id: String
+    ): List<Trailer>
 }

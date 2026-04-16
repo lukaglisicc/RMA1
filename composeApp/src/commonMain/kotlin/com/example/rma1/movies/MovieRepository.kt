@@ -4,7 +4,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface MovieRepository {
 
-    enum class sortType(){
+    enum class SortType(){
         RATING,
         YEAR,
         TITLE,
@@ -14,15 +14,14 @@ interface MovieRepository {
     data class MoviesState(
         val movies: List<Movie> = emptyList(),
         val isLoading: Boolean = true,
-        val error: Throwable? = null
+        val error: Throwable? = null,
     )
 
     fun observeMovies(): Flow<MoviesState>
 
-    fun setQueryParams(
-        pageSize: Int? = null,
-        sortBy: sortType? = null,
-        sortOrder: String? = null,
+    fun observeFilters(): Flow<Filters>
+
+    suspend fun setQueryFilters(
         genreId: Int? = null,
         query: String? = null,
         minYear: Int? = null,
@@ -30,12 +29,15 @@ interface MovieRepository {
         minRating: Float? = null
     )
 
-    fun resetQueryParams()
+    suspend fun setQuerySorting(
+        sortBy: SortType,
+        sortOrder: String,
+    )
 
-    fun resetQuerySort()
-
-    fun queryMovies()
+    suspend fun queryMovies()
 
     suspend fun getMovieDetails(id: String) : MovieDetailsFull
+
+    suspend fun getGenres() : List<Genre>
 
 }

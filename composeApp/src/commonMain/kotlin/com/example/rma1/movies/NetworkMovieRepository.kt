@@ -4,24 +4,19 @@ import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import com.example.rma1.movies.MovieRepository.MoviesState
-import io.ktor.client.plugins.api.SetupRequest
 import kotlin.Int
 
 
 class NetworkMovieRepository : MovieRepository{
 
     private var pageSize: Int = 30
-    private var sortBy: MovieRepository.sortType = MovieRepository.sortType.RATING
+    private var sortBy: MovieRepository.SortType = MovieRepository.SortType.RATING
     private var sortOrder: String = "desc"
     private var genreId: Int? = null
     private var query: String? = null
@@ -54,54 +49,39 @@ class NetworkMovieRepository : MovieRepository{
     //Flow setup
     private val _movies = MutableStateFlow(MoviesState())
 
-    private var config: List<ConfigPair>? = null
+    private val _filters = MutableStateFlow(Filters())
 
-    //Load movies at init
-    init {
-        loadMovies()
-    }
+    private var config: List<ConfigPair>? = null
 
 
     override fun observeMovies(): Flow<MoviesState> = _movies.asStateFlow()
 
-    override fun setQueryParams(
-        pageSize: Int?,
-        sortBy: MovieRepository.sortType?,
-        sortOrder: String?,
+    override fun observeFilters(): Flow<Filters> = _filters.asStateFlow()
+
+    override suspend fun setQueryFilters(
         genreId: Int?,
         query: String?,
         minYear: Int?,
         maxYear: Int?,
         minRating: Float?
     ) {
-        pageSize?.let { this.pageSize = it }
-        sortBy?.let { this.sortBy = it }
-        sortOrder?.let { this.sortOrder = it }
-        genreId?.let { this.genreId = it }
-        query?.let { this.query = it }
-        minYear?.let { this.minYear = it }
-        maxYear?.let { this.maxYear = it }
-        minRating?.let { this.minRating = it }
-        queryMovies()
+        this.genreId = genreId
+        this.query = query
+        this.minYear = minYear
+        this.maxYear = maxYear
+        this.minRating = minRating
+        updateFilters()
     }
 
-    override fun resetQueryParams() {
-        pageSize = 30
-        genreId = null
-        query = null
-        minYear = null
-        maxYear = null
-        minRating = null
-        queryMovies()
+    override suspend fun setQuerySorting(
+        sortBy: MovieRepository.SortType,
+        sortOrder: String
+    ) {
+        this.sortBy = sortBy
+        this.sortOrder = sortOrder
     }
 
-    override fun resetQuerySort() {
-        sortBy = MovieRepository.sortType.RATING
-        sortOrder = "desc"
-        queryMovies()
-    }
-
-    override fun queryMovies() {
+    override suspend fun queryMovies() {
         loadMovies(
             pageSize = pageSize,
             sortBy = mapSort(sortBy),
@@ -122,10 +102,15 @@ class NetworkMovieRepository : MovieRepository{
         )
         val imagePaths = getMovieImages(id)
         val cast = getMovieCast(id)
-        return MovieDetailsFull(movieDetails, imagePaths, cast)
+        val trailerPath = api.getMovieTrailers(id)[0].key
+        return MovieDetailsFull(movieDetails, imagePaths, cast, trailerPath)
     }
 
-    fun loadMovies(
+    override suspend fun getGenres(): List<Genre> {
+        return api.getGenres()
+    }
+
+    suspend fun loadMovies(
         pageSize: Int = 30,
         sortBy: String = "imdb_rating",
         sortOrder: String = "desc",
@@ -141,31 +126,29 @@ class NetworkMovieRepository : MovieRepository{
                 error = null,
             )
         }
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val movies = getMovies(
-                    pageSize = pageSize,
-                    sortBy = sortBy,
-                    sortOrder = sortOrder,
-                    genreId = genreId,
-                    query = query,
-                    minYear = minYear,
-                    maxYear = maxYear,
-                    minRating = minRating,
+        try {
+            val movies = getMovies(
+                pageSize = pageSize,
+                sortBy = sortBy,
+                sortOrder = sortOrder,
+                genreId = genreId,
+                query = query,
+                minYear = minYear,
+                maxYear = maxYear,
+                minRating = minRating,
+            )
+            _movies.update {
+                it.copy(
+                    movies = movies,
+                    isLoading = false,
                 )
-                _movies.update {
-                    it.copy(
-                        movies = movies,
-                        isLoading = false,
-                    )
-                }
-            } catch (e: Exception){
-                _movies.update {
-                    it.copy(
-                        isLoading = false,
-                        error = e,
-                    )
-                }
+            }
+        } catch (e: Exception){
+            _movies.update {
+                it.copy(
+                    isLoading = false,
+                    error = e,
+                )
             }
         }
     }
@@ -196,6 +179,18 @@ class NetworkMovieRepository : MovieRepository{
                     posterPath = getImageUrl(movie.posterPath, 1)
                 )
             }
+    }
+
+    private fun updateFilters(){
+        _filters.update {
+            it.copy(
+                genreId = genreId,
+                query = query,
+                minYear = minYear,
+                maxYear = maxYear,
+                minRating = minRating,
+            )
+        }
     }
 
     private suspend fun getImageUrl(path: String?, quality: Int, imageType: ImageType = ImageType.POSTER): String {
@@ -233,12 +228,12 @@ class NetworkMovieRepository : MovieRepository{
             }
     }
 
-    private fun mapSort(sortType: MovieRepository.sortType) : String{
+    private fun mapSort(sortType: MovieRepository.SortType) : String{
         return when(sortType){
-            MovieRepository.sortType.RATING -> "imdb_rating"
-            MovieRepository.sortType.POPULARITY -> "popularity"
-            MovieRepository.sortType.YEAR -> "year"
-            MovieRepository.sortType.TITLE -> "title"
+            MovieRepository.SortType.RATING -> "imdb_rating"
+            MovieRepository.SortType.POPULARITY -> "popularity"
+            MovieRepository.SortType.YEAR -> "year"
+            MovieRepository.SortType.TITLE -> "title"
         }
     }
 

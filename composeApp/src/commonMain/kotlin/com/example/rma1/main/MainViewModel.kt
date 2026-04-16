@@ -2,14 +2,15 @@ package com.example.rma1.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import com.example.rma1.movies.MovieRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.withContext
 
 class MainViewModel (
     private val movieRepository: MovieRepository
@@ -29,8 +30,12 @@ class MainViewModel (
     }
 
     init {
+        observeFilters()
         observeMovies()
         observeEvents()
+        viewModelScope.launch (Dispatchers.IO){
+            movieRepository.queryMovies()
+        }
     }
 
     private fun observeMovies() {
@@ -49,6 +54,23 @@ class MainViewModel (
         }
     }
 
+    private fun observeFilters() {
+        viewModelScope.launch {
+            movieRepository
+                .observeFilters()
+                .collect { filters ->
+                    setState {
+                        this.copy(
+                            filters = filters,
+                        )
+                    }
+                    withContext(Dispatchers.IO){
+                        movieRepository.queryMovies()
+                    }
+                }
+        }
+    }
+
     private fun observeEvents(){
         viewModelScope.launch {
             events.collect { event ->
@@ -61,14 +83,20 @@ class MainViewModel (
         }
     }
 
+
     private fun sortMovies(
-        sortType: MovieRepository.sortType,
+        sortType: MovieRepository.SortType,
         order: String,
     ){
-        movieRepository.setQueryParams(
-            sortBy = sortType,
-            sortOrder = order,
-        )
+        viewModelScope.launch {
+            movieRepository.setQuerySorting(
+                sortBy = sortType,
+                sortOrder = order,
+            )
+            withContext(Dispatchers.IO){
+                movieRepository.queryMovies()
+            }
+        }
     }
 
 

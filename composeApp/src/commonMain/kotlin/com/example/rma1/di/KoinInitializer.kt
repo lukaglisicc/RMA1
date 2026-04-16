@@ -1,6 +1,6 @@
 package com.example.rma1.di
 
-import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.rma1.filters.FiltersViewModel
 import com.example.rma1.main.MainViewModel
 import com.example.rma1.movieDetails.MovieDetailsViewModel
 import com.example.rma1.movies.MovieRepository
@@ -16,6 +16,7 @@ val mainModule = module {
     single { NetworkMovieRepository() } bind MovieRepository::class
     viewModelOf(::MainViewModel)
     viewModelOf(::MovieDetailsViewModel)
+    viewModelOf(::FiltersViewModel)
 }
 
 fun initKoin(config: KoinAppDeclaration? = null): KoinApplication {

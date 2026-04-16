@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeContent
-import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -30,6 +28,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -38,6 +37,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.example.rma1.movies.Cast
@@ -51,18 +51,33 @@ fun MovieDetailsScreen(
 ) {
     val state by viewModel.state.collectAsState()
 
+    val uriHandler = LocalUriHandler.current
+
+
+    LaunchedEffect(viewModel){
+        viewModel.effects.collect{ effect ->
+            when(effect){
+                is MovieDetailsContract.SideEffect.TrailerLaunched -> {
+                    uriHandler.openUri(
+                        "https://www.youtube.com/watch?v=${effect.path}"
+                    )
+                }
+            }
+        }
+    }
+
     MovieDetailsScreen(
         state = state,
+        eventPublisher = viewModel::setEvent,
         onClose = onClose,
-        onPlayClick = {},
     )
 }
 
 @Composable
 private fun MovieDetailsScreen(
     state: MovieDetailsContract.UiState,
+    eventPublisher: (MovieDetailsContract.UiEvent) -> Unit,
     onClose: () -> Unit,
-    onPlayClick: () -> Unit,
 ) {
 
     if (state.isLoading){
@@ -149,7 +164,8 @@ private fun MovieDetailsScreen(
             imagePaths = state.movieDetailsFull.imagePaths,
             cast = state.movieDetailsFull.cast,
             onClose = onClose,
-            onPlayClick = onPlayClick,
+            eventPublisher = eventPublisher,
+            trailerPath = state.movieDetailsFull.trailerPath,
         )
     }
 }
@@ -160,7 +176,8 @@ private fun MovieDetailsScreen(
     imagePaths: List<String>,
     cast: List<Cast>,
     onClose: () -> Unit,
-    onPlayClick: () -> Unit,
+    eventPublisher: (MovieDetailsContract.UiEvent) -> Unit,
+    trailerPath: String,
 ) {
     LazyColumn{
         item {
@@ -168,7 +185,8 @@ private fun MovieDetailsScreen(
                 backdropUrl = movieDetails.backdropPath,
                 posterUrl = movieDetails.posterPath,
                 onBackClick = onClose,
-                onPlayClick = onPlayClick
+                eventPublisher = eventPublisher,
+                trailerUrl = trailerPath,
             )
         }
 
@@ -185,7 +203,8 @@ private fun HeroSection(
     backdropUrl: String,
     posterUrl: String,
     onBackClick: () -> Unit,
-    onPlayClick: () -> Unit
+    eventPublisher: (MovieDetailsContract.UiEvent) -> Unit,
+    trailerUrl: String,
 ) {
     Box {
         // BACKDROP IMAGE
@@ -233,7 +252,7 @@ private fun HeroSection(
 
         // play button centered
         FloatingActionButton(
-            onClick = onPlayClick,
+            onClick = { eventPublisher(MovieDetailsContract.UiEvent.LaunchTrailer(trailerUrl)) },
             modifier = Modifier.align(Alignment.Center)
         ) {
             Icon(Icons.Default.PlayArrow, contentDescription = "Play")

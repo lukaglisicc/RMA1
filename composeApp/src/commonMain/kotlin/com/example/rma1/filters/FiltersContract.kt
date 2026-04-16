@@ -1,12 +1,13 @@
 package com.example.rma1.filters
 
+import com.example.rma1.movies.Filters
 import com.example.rma1.movies.Genre
-import com.example.rma1.movies.MovieRepository
 
 interface FiltersContract {
 
     data class UiState(
-        val movies: List<Genre> = emptyList(),
+        val genres: List<Genre> = emptyList(),
+        var filters: Filters = Filters(),
         val isLoading: Boolean = true,
         val error: Throwable? = null
     )

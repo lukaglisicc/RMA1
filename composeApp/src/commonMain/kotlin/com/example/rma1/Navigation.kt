@@ -8,6 +8,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.rma1.filters.FiltersScreen
+import com.example.rma1.filters.FiltersViewModel
 import com.example.rma1.main.MainScreen
 import com.example.rma1.main.MainViewModel
 import com.example.rma1.movieDetails.MovieDetailsScreen
@@ -27,12 +29,25 @@ fun Navigation(
         startDestination = startDestination,
     ) {
         composable(
-            route = "com/example/rma1/main"
+            route = "main"
         ) {
             val viewModel = koinViewModel<MainViewModel>()
             MainScreen(
                 viewModel = viewModel,
                 onMovieClick = { navController.navigateToMovie(it) },
+                onFiltersClick = { navController.navigate("filters")}
+            )
+        }
+
+        composable(
+            route = "filters"
+        ) {
+            val viewModel = koinViewModel<FiltersViewModel>()
+            FiltersScreen(
+                viewModel = viewModel,
+                onClose = {
+                    navController.navigateUp()
+                },
             )
         }
 
@@ -50,7 +65,7 @@ fun Navigation(
                 viewModel = viewModel,
                 onClose = {
                     navController.navigateUp()
-                }
+                },
             )
         }
     }
