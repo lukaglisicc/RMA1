@@ -1,4 +1,4 @@
-package com.example.rma1.main
+package com.example.rma1.screens.movieList
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,20 +12,20 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.withContext
 
-class MainViewModel (
+class MovieListViewModel (
     private val movieRepository: MovieRepository
 ) : ViewModel() {
 
     //UI State flow
-    private val _state = MutableStateFlow(MainContract.UiState())
+    private val _state = MutableStateFlow(MovieListContract.UiState())
     val state = _state.asStateFlow()
-    private fun setState(reducer: MainContract.UiState.() -> MainContract.UiState){
+    private fun setState(reducer: MovieListContract.UiState.() -> MovieListContract.UiState){
         _state.getAndUpdate(reducer)
     }
 
     //UI Event flow
-    private val events = MutableSharedFlow<MainContract.UiEvent>()
-    fun setEvent(event: MainContract.UiEvent){
+    private val events = MutableSharedFlow<MovieListContract.UiEvent>()
+    fun setEvent(event: MovieListContract.UiEvent){
         viewModelScope.launch { events.emit(event) }
     }
 
@@ -75,7 +75,7 @@ class MainViewModel (
         viewModelScope.launch {
             events.collect { event ->
                 when(event){
-                    is MainContract.UiEvent.SortMovies -> {
+                    is MovieListContract.UiEvent.SortMovies -> {
                         sortMovies(event.sortBy, event.order)
                     }
                 }

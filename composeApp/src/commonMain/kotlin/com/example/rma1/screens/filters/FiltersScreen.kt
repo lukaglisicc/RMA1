@@ -1,4 +1,4 @@
-package com.example.rma1.filters
+package com.example.rma1.screens.filters
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

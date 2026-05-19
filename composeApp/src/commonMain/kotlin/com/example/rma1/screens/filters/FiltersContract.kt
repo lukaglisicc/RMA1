@@ -1,4 +1,4 @@
-package com.example.rma1.filters
+package com.example.rma1.screens.filters
 
 import com.example.rma1.movies.Filters
 import com.example.rma1.movies.Genre

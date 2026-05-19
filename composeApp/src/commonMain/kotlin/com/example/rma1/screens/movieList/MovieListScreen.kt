@@ -1,4 +1,4 @@
-package com.example.rma1.main
+package com.example.rma1.screens.movieList
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -43,7 +43,7 @@ import com.example.rma1.movies.appliedFilters
 
 @Composable
 fun MainScreen(
-    viewModel: MainViewModel,
+    viewModel: MovieListViewModel,
     onMovieClick: (movieId: String) -> Unit,
     onFiltersClick: () -> Unit,
 ) {
@@ -60,9 +60,9 @@ fun MainScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MainScreen(
-    state: MainContract.UiState,
+    state: MovieListContract.UiState,
     onMovieClick: (movieId: String) -> Unit,
-    eventPublisher: (MainContract.UiEvent) -> Unit,
+    eventPublisher: (MovieListContract.UiEvent) -> Unit,
     onFiltersClick: () -> Unit,
 ) {
 
@@ -127,28 +127,28 @@ private fun MainScreen(
                                 text = {Text("Rating")},
                                 onClick = {
                                     isSortExpanded = false
-                                    eventPublisher(MainContract.UiEvent.SortMovies(MovieRepository.SortType.RATING))
+                                    eventPublisher(MovieListContract.UiEvent.SortMovies(MovieRepository.SortType.RATING))
                                 },
                             )
                             DropdownMenuItem(
                                 text = {Text("Popularity")},
                                 onClick = {
                                     isSortExpanded = false
-                                    eventPublisher(MainContract.UiEvent.SortMovies(MovieRepository.SortType.POPULARITY))
+                                    eventPublisher(MovieListContract.UiEvent.SortMovies(MovieRepository.SortType.POPULARITY))
                                 },
                             )
                             DropdownMenuItem(
                                 text = {Text("Year")},
                                 onClick = {
                                     isSortExpanded = false
-                                    eventPublisher(MainContract.UiEvent.SortMovies(MovieRepository.SortType.YEAR))
+                                    eventPublisher(MovieListContract.UiEvent.SortMovies(MovieRepository.SortType.YEAR))
                                 },
                             )
                             DropdownMenuItem(
                                 text = {Text("Title")},
                                 onClick = {
                                     isSortExpanded = false
-                                    eventPublisher(MainContract.UiEvent.SortMovies(MovieRepository.SortType.TITLE, "asc"))
+                                    eventPublisher(MovieListContract.UiEvent.SortMovies(MovieRepository.SortType.TITLE, "asc"))
                                 },
                             )
                         }

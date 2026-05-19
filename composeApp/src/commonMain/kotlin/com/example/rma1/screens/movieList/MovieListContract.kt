@@ -1,11 +1,10 @@
-package com.example.rma1.main
+package com.example.rma1.screens.movieList
 
 import com.example.rma1.movies.Filters
-import com.example.rma1.movies.Movie
 import com.example.rma1.movies.MovieRepository
 import com.example.rma1.movies.MovieResponse
 
-interface MainContract {
+interface MovieListContract {
 
     data class UiState(
         val movieResponse: MovieResponse? = null,

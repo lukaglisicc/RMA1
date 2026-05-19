@@ -1,4 +1,4 @@
-package com.example.rma1.movieDetails
+package com.example.rma1.screens.movieDetails
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

@@ -1,4 +1,4 @@
-package com.example.rma1.movieDetails
+package com.example.rma1.screens.movieDetails
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
