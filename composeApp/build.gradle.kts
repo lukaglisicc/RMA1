@@ -10,6 +10,7 @@ plugins {
     alias(libs.plugins.kotlinxSerialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.ktorfit)
+    alias(libs.plugins.room)
 }
 
 kotlin {
@@ -38,6 +39,9 @@ kotlin {
 
             //Coil
             implementation(libs.coil.network.okhttp)
+
+            // Room
+            implementation(libs.room.runtime.android)
         }
         commonMain.dependencies {
             implementation(libs.compose.runtime)
@@ -73,6 +77,13 @@ kotlin {
 
             // Coil
             implementation(libs.coil.compose)
+
+            // DateTime
+            implementation(libs.kotlinx.datetime)
+
+            // Room
+            implementation(libs.room.runtime)
+            implementation(libs.sqlite.bundled)
 
 
         }
@@ -120,13 +131,24 @@ android {
     }
 }
 
+
 ktorfit {
     compilerPluginVersion.set("2.3.3")
+}
+
+room {
+    schemaDirectory("$projectDir/schemas")
 }
 
 dependencies {
     debugImplementation(libs.compose.uiTooling)
     add("kspCommonMainMetadata", "de.jensklingenberg.ktorfit:ktorfit-ksp:1.9.0")
+    listOf(
+        "kspAndroid",
+        "kspJvm",
+        "kspIosSimulatorArm64",
+        "kspIosArm64",
+    ).forEach { add(it, libs.room.compiler) }
 }
 
 

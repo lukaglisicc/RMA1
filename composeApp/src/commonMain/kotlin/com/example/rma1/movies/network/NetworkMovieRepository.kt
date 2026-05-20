@@ -46,7 +46,7 @@ class NetworkMovieRepository : MovieRepository {
     .baseUrl("https://rma.finlab.rs/")
     .httpClient(client)
     .build()
-    private val api = ktorfit.create<MovieNetworkApi>()
+    private val api = ktorfit.create<NetworkMovieApi>()
     //Flow setup
     private val _movies = MutableStateFlow(MoviesState())
 
