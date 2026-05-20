@@ -5,7 +5,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -15,10 +20,12 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.example.rma1.movies.Movie
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun MovieListItem(
     movie: Movie,
-    onClick: (() -> Unit),
+    onClick: () -> Unit,
+    onDeleteClick: (() -> Unit)? = null,
 ) {
     ListItem(
         modifier = Modifier.clickable(
@@ -59,6 +66,18 @@ fun MovieListItem(
                 contentDescription = null,
                 modifier = Modifier.fillMaxHeight(),
             )
+        },
+        trailingContent = {
+            if (onDeleteClick != null){
+                IconButton(
+                    onClick = {},
+                ){
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = "Remove"
+                    )
+                }
+            }
         }
     )
 }
