@@ -1,4 +1,4 @@
-package com.example.rma1.screens.filters
+package com.example.rma1.views.filters
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

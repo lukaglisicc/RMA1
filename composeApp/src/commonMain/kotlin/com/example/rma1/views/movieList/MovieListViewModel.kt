@@ -1,4 +1,4 @@
-package com.example.rma1.screens.movieList
+package com.example.rma1.views.movieList
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -98,7 +98,5 @@ class MovieListViewModel (
             }
         }
     }
-
-
 
 }

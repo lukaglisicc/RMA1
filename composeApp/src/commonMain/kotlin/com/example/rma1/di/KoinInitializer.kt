@@ -1,8 +1,8 @@
 package com.example.rma1.di
 
-import com.example.rma1.screens.filters.FiltersViewModel
-import com.example.rma1.screens.movieList.MovieListViewModel
-import com.example.rma1.screens.movieDetails.MovieDetailsViewModel
+import com.example.rma1.views.filters.FiltersViewModel
+import com.example.rma1.views.movieList.MovieListViewModel
+import com.example.rma1.views.movieDetails.MovieDetailsViewModel
 import com.example.rma1.movies.MovieRepository
 import com.example.rma1.movies.NetworkMovieRepository
 import org.koin.core.KoinApplication

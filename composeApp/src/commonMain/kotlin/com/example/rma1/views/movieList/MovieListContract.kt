@@ -1,4 +1,4 @@
-package com.example.rma1.screens.movieList
+package com.example.rma1.views.movieList
 
 import com.example.rma1.movies.Filters
 import com.example.rma1.movies.MovieRepository

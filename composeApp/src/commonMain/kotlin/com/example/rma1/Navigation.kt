@@ -8,12 +8,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.rma1.screens.filters.FiltersScreen
-import com.example.rma1.screens.filters.FiltersViewModel
-import com.example.rma1.screens.movieList.MainScreen
-import com.example.rma1.screens.movieList.MovieListViewModel
-import com.example.rma1.screens.movieDetails.MovieDetailsScreen
-import com.example.rma1.screens.movieDetails.MovieDetailsViewModel
+import com.example.rma1.views.filters.FiltersScreen
+import com.example.rma1.views.filters.FiltersViewModel
+import com.example.rma1.views.movieList.MainScreen
+import com.example.rma1.views.movieList.MovieListViewModel
+import com.example.rma1.views.movieDetails.MovieDetailsScreen
+import com.example.rma1.views.movieDetails.MovieDetailsViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
 

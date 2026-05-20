@@ -5,7 +5,7 @@ import de.jensklingenberg.ktorfit.http.Path
 import de.jensklingenberg.ktorfit.http.Query
 
 
-interface MovieApi {
+interface MovieNetworkApi {
 
     @GET("movies")
     suspend fun getMovies(

@@ -1,9 +1,10 @@
-package com.example.rma1.screens.movieDetails
+package com.example.rma1.views.movieDetails
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,16 +16,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,7 +40,10 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.example.rma1.movies.Cast
 import com.example.rma1.movies.MovieDetails
-import kotlin.math.pow
+import com.example.rma1.movies.MovieDetailsFull
+import com.example.rma1.views.ScreenBase
+import com.example.rma1.views.formatBudget
+import com.example.rma1.views.truncate
 
 @Composable
 fun MovieDetailsScreen(
@@ -80,121 +81,74 @@ private fun MovieDetailsScreen(
     onClose: () -> Unit,
 ) {
 
-    if (state.isLoading){
-        Column(
-            modifier = Modifier.fillMaxSize(),
-        ) {
-            IconButton(
-                onClick = onClose,
-                modifier = Modifier
-                    .padding(horizontal = 8.dp, vertical = 40.dp)
-                    .background(
-                        color = Color.Black.copy(alpha = 0.5f),
-                        shape = CircleShape
-                    )
-            ) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = Color.White,
-                )
-            }
+    ScreenBase(
+        onBack = onClose,
+        title = "",
+    ) { padding ->
+        if (state.isLoading){
             Box(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
                 contentAlignment = Alignment.Center,
             ) {
                 CircularProgressIndicator()
             }
-        }
-    } else if (state.error != null) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-        ) {
-            IconButton(
-                onClick = onClose,
-                modifier = Modifier
-                    .padding(horizontal = 8.dp, vertical = 40.dp)
-                    .background(
-                        color = Color.Black.copy(alpha = 0.5f),
-                        shape = CircleShape
-                    )
-            ) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = Color.White,
-                )
-            }
+        } else if (state.error != null) {
             Box(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(text = "Error: ${state.error.message}")
             }
-        }
-    } else if (state.movieDetailsFull == null) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-        ) {
-            IconButton(
-                onClick = onClose,
-                modifier = Modifier
-                    .padding(horizontal = 8.dp, vertical = 40.dp)
-                    .background(
-                        color = Color.Black.copy(alpha = 0.5f),
-                        shape = CircleShape
-                    )
-            ) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = Color.White,
-                )
-            }
+        } else if (state.movieDetailsFull == null) {
             Box(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(text = "No movies details.")
             }
+        } else {
+            MovieDetailsContent(
+                movieDetailsFull = state.movieDetailsFull,
+                onClose = onClose,
+                eventPublisher = eventPublisher,
+                padding = padding,
+            )
         }
-    } else {
-        MovieDetailsScreen(
-            movieDetails = state.movieDetailsFull.movieDetails,
-            imagePaths = state.movieDetailsFull.imagePaths,
-            cast = state.movieDetailsFull.cast,
-            onClose = onClose,
-            eventPublisher = eventPublisher,
-            trailerPath = state.movieDetailsFull.trailerPath,
-        )
     }
 }
 
 @Composable
-private fun MovieDetailsScreen(
-    movieDetails: MovieDetails,
-    imagePaths: List<String>,
-    cast: List<Cast>,
+private fun MovieDetailsContent(
+    movieDetailsFull: MovieDetailsFull,
     onClose: () -> Unit,
     eventPublisher: (MovieDetailsContract.UiEvent) -> Unit,
-    trailerPath: String,
+    padding: PaddingValues,
 ) {
-    LazyColumn{
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(padding),
+    ){
         item {
             HeroSection(
-                backdropUrl = movieDetails.backdropPath,
-                posterUrl = movieDetails.posterPath,
+                backdropUrl = movieDetailsFull.movieDetails.backdropPath,
+                posterUrl = movieDetailsFull.movieDetails.posterPath,
                 onBackClick = onClose,
                 eventPublisher = eventPublisher,
-                trailerUrl = trailerPath,
+                trailerUrl = movieDetailsFull.trailerPath,
             )
         }
-
-        item { MovieInfoSection(movieDetails) }
-        item { OverviewSection(movieDetails.desc) }
-        item { InfoStatsSection(movieDetails) }
-        item { ImagesSection(imagePaths) }
-        item { ActorsSection(cast) }
+        item { MovieInfoSection(movieDetailsFull.movieDetails) }
+        item { OverviewSection(movieDetailsFull.movieDetails.desc) }
+        item { InfoStatsSection(movieDetailsFull.movieDetails) }
+        item { ImagesSection(movieDetailsFull.imagePaths) }
+        item { ActorsSection(movieDetailsFull.cast) }
     }
 }
 
@@ -231,24 +185,6 @@ private fun HeroSection(
                     )
                 )
         )
-
-
-        // back button
-        IconButton(
-            onClick = onBackClick,
-            modifier = Modifier
-                .padding(horizontal = 8.dp, vertical = 40.dp)
-                .background(
-                color = Color.Black.copy(alpha = 0.5f),
-                shape = CircleShape
-            )
-        ) {
-            Icon(
-                Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Back",
-                tint = Color.White,
-            )
-        }
 
         // play button centered
         FloatingActionButton(
@@ -325,8 +261,8 @@ private fun InfoStatsSection(movieDetails: MovieDetails) {
                 .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            InfoCard("Budget", budgetFormat(movieDetails.budget))
-            InfoCard("Revenue", budgetFormat(movieDetails.revenue))
+            InfoCard("Budget", formatBudget(movieDetails.budget))
+            InfoCard("Revenue", formatBudget(movieDetails.revenue))
             InfoCard("Language", movieDetails.languageCode)
             InfoCard("Popularity", movieDetails.popularity.truncate(1).toString())
         }
@@ -388,19 +324,4 @@ private fun ActorsSection(cast: List<Cast>){
             }
         }
     }
-}
-
-private fun budgetFormat(budget: Int): String{
-    if(budget >= 1_000_000_000){
-        return "\$${budget / 1000_000_000}B"
-    }else if(budget >= 1_000_000){
-        return "\$${budget / 1_000_000}M"
-    } else {
-        return "\$${budget / 1000},${budget % 1000}"
-    }
-}
-
-private fun Float.truncate(decimals: Int): Float {
-    val factor = 10f.pow(decimals)
-    return (this * factor).toInt() / factor
 }

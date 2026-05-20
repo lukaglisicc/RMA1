@@ -1,28 +1,21 @@
-package com.example.rma1.screens.filters
+package com.example.rma1.views.filters
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
@@ -37,9 +30,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import kotlin.math.pow
+import com.example.rma1.views.ScreenBase
+import com.example.rma1.views.truncate
 
 @Composable
 fun FiltersScreen (
@@ -72,72 +66,49 @@ private fun FiltersScreen (
     onClose: () -> Unit,
     eventPublisher: (FiltersContract.UiEvent) -> Unit,
 ) {
-    if (state.isLoading){
-        Column(
-            modifier = Modifier.fillMaxSize(),
-        ) {
-            IconButton(
-                onClick = onClose,
-                modifier = Modifier
-                    .padding(horizontal = 8.dp, vertical = 40.dp)
-                    .background(
-                        color = Color.Black.copy(alpha = 0.5f),
-                        shape = CircleShape
-                    )
-            ) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = Color.White,
-                )
-            }
+
+    ScreenBase(
+        onBack = onClose,
+        title = "Filters",
+    ){ padding ->
+
+        if (state.isLoading){
             Box(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
                 contentAlignment = Alignment.Center,
             ) {
                 CircularProgressIndicator()
             }
         }
-    } else if (state.error != null) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-        ) {
-            IconButton(
-                onClick = onClose,
-                modifier = Modifier
-                    .padding(horizontal = 8.dp, vertical = 40.dp)
-                    .background(
-                        color = Color.Black.copy(alpha = 0.5f),
-                        shape = CircleShape
-                    )
-            ) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = Color.White,
-                )
-            }
+
+        else if (state.error != null) {
             Box(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(text = "Error: ${state.error.message}")
             }
         }
-    } else {
-        FiltersScreenMain(
-            state = state,
-            onClose = onClose,
-            eventPublisher = eventPublisher,
-        )
+
+        else {
+            FiltersScreenMain(
+                state = state,
+                eventPublisher = eventPublisher,
+                padding = padding,
+            )
+        }
     }
 }
 
 @Composable
 private fun FiltersScreenMain (
     state: FiltersContract.UiState,
-    onClose: () -> Unit,
     eventPublisher: (FiltersContract.UiEvent) -> Unit,
+    padding: PaddingValues,
 ) {
     var search by remember { mutableStateOf(state.filters.query ?: "") }
     var minYear by remember { mutableStateOf(state.filters.minYear ?: 1920) }
@@ -153,47 +124,24 @@ private fun FiltersScreenMain (
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(padding)
+            .padding(horizontal = 16.dp)
             .verticalScroll(state = scrollState)
     ) {
 
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            IconButton(
-                onClick = onClose,
-                modifier = Modifier
-                    .padding(horizontal = 8.dp, vertical = 40.dp)
-                    .background(
-                        color = Color.Black.copy(alpha = 0.5f),
-                        shape = CircleShape
-                    )
-            ) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = Color.White,
-                )
+        Text(
+            text = "Clear All",
+            modifier = Modifier
+                .clickable {
+                search = ""
+                selectedGenreId = null
+                minYear = 1920
+                maxYear = 2025
+                rating = 0f
             }
-
-            Text(
-                "Filter Movies",
-                style = MaterialTheme.typography.titleMedium,
-            )
-
-            Text(
-                "Clear All",
-                modifier = Modifier.clickable {
-                    search = ""
-                    selectedGenreId = null
-                    minYear = 1920
-                    maxYear = 2025
-                    rating = 0f
-                }
-            )
-        }
+                .fillMaxWidth(),
+            textAlign = TextAlign.Right,
+        )
 
         Spacer(Modifier.height(16.dp))
 
@@ -299,10 +247,4 @@ private fun YearInput(
             modifier = Modifier.fillMaxWidth(),
         )
     }
-}
-
-
-private fun Float.truncate(decimals: Int): Float {
-    val factor = 10f.pow(decimals)
-    return (this * factor).toInt() / factor
 }
