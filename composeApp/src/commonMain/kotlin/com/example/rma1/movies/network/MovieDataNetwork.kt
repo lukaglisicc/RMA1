@@ -98,14 +98,6 @@ data class Backdrops(
     val backdrops: List<MovieImage>
 )
 
-data class Filters(
-    val genreId: Int? = null,
-    val query: String? = null,
-    val minYear: Int? = 1920,
-    val maxYear: Int? = 2025,
-    val minRating: Float? = 0F,
-)
-
 @Serializable
 data class Trailer (
     val key: String,
