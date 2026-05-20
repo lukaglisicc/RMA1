@@ -139,7 +139,6 @@ private fun MovieDetailsContent(
             HeroSection(
                 backdropUrl = movieDetailsFull.movieDetails.backdropPath,
                 posterUrl = movieDetailsFull.movieDetails.posterPath,
-                onBackClick = onClose,
                 eventPublisher = eventPublisher,
                 trailerUrl = movieDetailsFull.trailerPath,
             )
@@ -156,7 +155,6 @@ private fun MovieDetailsContent(
 private fun HeroSection(
     backdropUrl: String,
     posterUrl: String,
-    onBackClick: () -> Unit,
     eventPublisher: (MovieDetailsContract.UiEvent) -> Unit,
     trailerUrl: String,
 ) {
