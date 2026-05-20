@@ -25,6 +25,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -47,55 +48,57 @@ import com.example.rma1.movies.appliedFilters
 import com.example.rma1.views.MovieListItem
 import kotlinx.coroutines.launch
 
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(
     viewModel: MovieListViewModel,
     onMovieClick: (movieId: String) -> Unit,
     onFiltersClick: () -> Unit,
+    onFavoritesClick: () -> Unit,
+    onProfileClick: () -> Unit,
+    onQuizClick: () -> Unit,
+    onWatchlistClick: () -> Unit,
 ) {
+
     val state by viewModel.state.collectAsState()
-
-    MainScreen(
-        state = state,
-        onMovieClick = onMovieClick,
-        eventPublisher = viewModel::setEvent,
-        onFiltersClick = onFiltersClick,
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun MainScreen(
-    state: MovieListContract.UiState,
-    onMovieClick: (movieId: String) -> Unit,
-    eventPublisher: (MovieListContract.UiEvent) -> Unit,
-    onFiltersClick: () -> Unit,
-) {
-
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val scrollState = rememberScrollState()
+    val error = state.error
+    val movieResponse = state.movieResponse
+    val eventPublisher = viewModel::setEvent
 
 
 
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            ModalDrawerSheet {
-                Text(
-                    "Home",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { /* navigate */ }
-                        .padding(16.dp)
+            ModalDrawerSheet(
+                drawerState = drawerState
+            ) {
+                DrawerMenuItem(
+                    "Profile",
+                    onProfileClick,
+                    drawerState,
                 )
 
-                Text(
-                    "Settings",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { /* navigate */ }
-                        .padding(16.dp)
+                DrawerMenuItem(
+                    "Watchlist",
+                    onWatchlistClick,
+                    drawerState,
+                )
+
+                DrawerMenuItem(
+                    "Favorites",
+                    onFavoritesClick,
+                    drawerState,
+                )
+
+                DrawerMenuItem(
+                    "Quiz",
+                    onQuizClick,
+                    drawerState,
                 )
             }
         }
@@ -140,7 +143,7 @@ private fun MainScreen(
                     }
 
                     Text(
-                        text = "${((state.movieResponse?.totalItems ?: 0).toString())} movies",
+                        text = "${((movieResponse?.totalItems ?: 0).toString())} movies",
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 40.dp),
@@ -162,18 +165,18 @@ private fun MainScreen(
                     }
                 }
 
-                else if (state.error != null) {
+                else if (error != null) {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(paddingValues),
                         contentAlignment = Alignment.Center,
                     ) {
-                        Text(text = "Error: ${state.error.message}")
+                        Text(text = "Error: ${error.message}")
                     }
                 }
 
-                else if (state.movieResponse?.items?.isEmpty() ?: true) {
+                else if (movieResponse?.items?.isEmpty() ?: true) {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -191,7 +194,7 @@ private fun MainScreen(
                             .padding(paddingValues)
                             .verticalScroll(state = scrollState)
                     ) {
-                        state.movieResponse.items.forEach { movie ->
+                        movieResponse.items.forEach { movie ->
                             MovieListItem(
                                 movie = movie,
                                 onClick = {onMovieClick(movie.id)}
@@ -281,4 +284,26 @@ private fun SortButton(
             )
         }
     }
+}
+
+@Composable
+private fun DrawerMenuItem(
+    title: String,
+    onClick: () -> Unit,
+    drawerState: DrawerState,
+) {
+    val scope = rememberCoroutineScope()
+
+    Text(
+        text = title,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                onClick()
+                scope.launch {
+                    drawerState.close()
+                }
+            }
+            .padding(16.dp)
+    )
 }

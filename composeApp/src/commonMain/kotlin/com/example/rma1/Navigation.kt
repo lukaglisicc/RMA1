@@ -8,12 +8,20 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.rma1.views.favorites.FavoritesScreen
+import com.example.rma1.views.favorites.FavoritesViewModel
 import com.example.rma1.views.filters.FiltersScreen
 import com.example.rma1.views.filters.FiltersViewModel
 import com.example.rma1.views.movieList.MainScreen
 import com.example.rma1.views.movieList.MovieListViewModel
 import com.example.rma1.views.movieDetails.MovieDetailsScreen
 import com.example.rma1.views.movieDetails.MovieDetailsViewModel
+import com.example.rma1.views.profile.ProfileScreen
+import com.example.rma1.views.profile.ProfileViewModel
+import com.example.rma1.views.quiz.QuizScreen
+import com.example.rma1.views.quiz.QuizViewModel
+import com.example.rma1.views.watchlist.WatchlistScreen
+import com.example.rma1.views.watchlist.WatchlistViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
 
@@ -35,7 +43,11 @@ fun Navigation(
             MainScreen(
                 viewModel = viewModel,
                 onMovieClick = { navController.navigateToMovie(it) },
-                onFiltersClick = { navController.navigate("filters")}
+                onFiltersClick = { navController.navigate("filters")},
+                onFavoritesClick = {navController.navigate("favorites")},
+                onProfileClick = {navController.navigate("profile")},
+                onQuizClick = {navController.navigate("quiz")},
+                onWatchlistClick = {navController.navigate("watchlist")},
             )
         }
 
@@ -62,6 +74,54 @@ fun Navigation(
         ){
             val viewModel = koinViewModel<MovieDetailsViewModel>()
             MovieDetailsScreen(
+                viewModel = viewModel,
+                onClose = {
+                    navController.navigateUp()
+                },
+            )
+        }
+
+        composable(
+            route = "favorites"
+        ) {
+            val viewModel = koinViewModel<FavoritesViewModel>()
+            FavoritesScreen(
+                viewModel = viewModel,
+                onClose = {
+                    navController.navigateUp()
+                },
+            )
+        }
+
+        composable(
+            route = "profile"
+        ) {
+            val viewModel = koinViewModel<ProfileViewModel>()
+            ProfileScreen(
+                viewModel = viewModel,
+                onClose = {
+                    navController.navigateUp()
+                },
+            )
+        }
+
+        composable(
+            route = "quiz"
+        ) {
+            val viewModel = koinViewModel<QuizViewModel>()
+            QuizScreen(
+                viewModel = viewModel,
+                onClose = {
+                    navController.navigateUp()
+                },
+            )
+        }
+
+        composable(
+            route = "watchlist"
+        ) {
+            val viewModel = koinViewModel<WatchlistViewModel>()
+            WatchlistScreen(
                 viewModel = viewModel,
                 onClose = {
                     navController.navigateUp()

@@ -4,7 +4,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface MovieRepository {
 
-    enum class SortType(){
+    enum class SortType {
         RATING,
         YEAR,
         TITLE,
