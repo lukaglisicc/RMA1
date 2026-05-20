@@ -1,4 +1,4 @@
-package com.example.rma1.views
+package com.example.rma1.views.core.shared
 
 import kotlin.math.pow
 

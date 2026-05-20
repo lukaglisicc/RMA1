@@ -44,8 +44,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.rma1.movies.MovieRepository
-import com.example.rma1.movies.appliedFilters
-import com.example.rma1.views.MovieListItem
+import com.example.rma1.views.core.shared.MovieListItem
 import kotlinx.coroutines.launch
 
 

@@ -38,12 +38,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import com.example.rma1.movies.Cast
-import com.example.rma1.movies.MovieDetails
-import com.example.rma1.movies.MovieDetailsFull
-import com.example.rma1.views.ScreenBase
-import com.example.rma1.views.formatBudget
-import com.example.rma1.views.truncate
+import com.example.rma1.movies.MovieRepository
+import com.example.rma1.views.core.shared.ScreenBase
+import com.example.rma1.views.core.shared.formatBudget
+import com.example.rma1.views.core.shared.truncate
 
 @Composable
 fun MovieDetailsScreen(
@@ -103,7 +101,7 @@ private fun MovieDetailsScreen(
             ) {
                 Text(text = "Error: ${state.error.message}")
             }
-        } else if (state.movieDetailsFull == null) {
+        } else if (state.movieDetails == null) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -114,8 +112,7 @@ private fun MovieDetailsScreen(
             }
         } else {
             MovieDetailsContent(
-                movieDetailsFull = state.movieDetailsFull,
-                onClose = onClose,
+                movieDetails = state.movieDetails,
                 eventPublisher = eventPublisher,
                 padding = padding,
             )
@@ -125,8 +122,7 @@ private fun MovieDetailsScreen(
 
 @Composable
 private fun MovieDetailsContent(
-    movieDetailsFull: MovieDetailsFull,
-    onClose: () -> Unit,
+    movieDetails: MovieRepository.MovieDetails,
     eventPublisher: (MovieDetailsContract.UiEvent) -> Unit,
     padding: PaddingValues,
 ) {
@@ -137,17 +133,17 @@ private fun MovieDetailsContent(
     ){
         item {
             HeroSection(
-                backdropUrl = movieDetailsFull.movieDetails.backdropPath,
-                posterUrl = movieDetailsFull.movieDetails.posterPath,
+                backdropUrl = movieDetails.backdropPath,
+                posterUrl = movieDetails.posterPath,
                 eventPublisher = eventPublisher,
-                trailerUrl = movieDetailsFull.trailerPath,
+                trailerUrl = movieDetails.trailerPath,
             )
         }
-        item { MovieInfoSection(movieDetailsFull.movieDetails) }
-        item { OverviewSection(movieDetailsFull.movieDetails.desc) }
-        item { InfoStatsSection(movieDetailsFull.movieDetails) }
-        item { ImagesSection(movieDetailsFull.imagePaths) }
-        item { ActorsSection(movieDetailsFull.cast) }
+        item { MovieInfoSection(movieDetails) }
+        item { OverviewSection(movieDetails.desc) }
+        item { InfoStatsSection(movieDetails) }
+        item { ImagesSection(movieDetails.imagePaths) }
+        item { ActorsSection(movieDetails.cast) }
     }
 }
 
@@ -210,7 +206,7 @@ private fun HeroSection(
 }
 
 @Composable
-private fun MovieInfoSection(movieDetails: MovieDetails) {
+private fun MovieInfoSection(movieDetails: MovieRepository.MovieDetails) {
     Column(modifier = Modifier.padding(16.dp)) {
 
         Text(
@@ -249,7 +245,7 @@ private fun OverviewSection(text: String) {
 }
 
 @Composable
-private fun InfoStatsSection(movieDetails: MovieDetails) {
+private fun InfoStatsSection(movieDetails: MovieRepository.MovieDetails) {
     Column(Modifier.padding(16.dp)) {
         Text("INFO", style = MaterialTheme.typography.titleMedium)
         Spacer(Modifier.height(8.dp))
@@ -298,7 +294,7 @@ private fun ImagesSection(imagePaths: List<String>){
 }
 
 @Composable
-private fun ActorsSection(cast: List<Cast>){
+private fun ActorsSection(cast: List<MovieRepository.Cast>){
     Column(Modifier.padding(16.dp)) {
         Text("CAST", style = MaterialTheme.typography.titleMedium)
         Spacer(Modifier.height(8.dp))

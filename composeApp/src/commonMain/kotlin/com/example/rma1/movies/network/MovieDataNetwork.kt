@@ -1,4 +1,4 @@
-package com.example.rma1.movies
+package com.example.rma1.movies.network
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.SerialName
 
@@ -105,16 +105,6 @@ data class Filters(
     val maxYear: Int? = 2025,
     val minRating: Float? = 0F,
 )
-
-fun Filters.appliedFilters() : Int {
-    var i = 0
-    if (this.query != null) i++
-    if (this.genreId != null) i++
-    if (this.minYear != 1920) i++
-    if (this.maxYear != 2025) i++
-    if (this.minRating != 0F) i++
-    return i
-}
 
 @Serializable
 data class Trailer (

@@ -1,7 +1,7 @@
 package com.example.rma1.di
 
 import com.example.rma1.movies.MovieRepository
-import com.example.rma1.movies.NetworkMovieRepository
+import com.example.rma1.movies.network.NetworkMovieRepository
 import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
 import org.koin.dsl.KoinAppDeclaration

@@ -32,8 +32,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.example.rma1.views.ScreenBase
-import com.example.rma1.views.truncate
+import com.example.rma1.views.core.shared.ScreenBase
+import com.example.rma1.views.core.shared.truncate
 
 @Composable
 fun FiltersScreen (

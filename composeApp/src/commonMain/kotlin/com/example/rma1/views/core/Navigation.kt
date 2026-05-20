@@ -1,4 +1,4 @@
-package com.example.rma1
+package com.example.rma1.views.core
 
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.SavedStateHandle

@@ -1,11 +1,12 @@
 package com.example.rma1.views.movieDetails
 
-import com.example.rma1.movies.MovieDetailsFull
+import com.example.rma1.movies.MovieRepository
+
 
 interface MovieDetailsContract {
 
     data class UiState(
-        val movieDetailsFull: MovieDetailsFull? = null,
+        val movieDetails: MovieRepository.MovieDetails? = null,
         val isLoading: Boolean = true,
         val error: Throwable? = null,
     )

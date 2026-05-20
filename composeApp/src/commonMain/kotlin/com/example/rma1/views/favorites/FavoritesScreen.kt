@@ -1,7 +1,7 @@
 package com.example.rma1.views.favorites
 
 import androidx.compose.runtime.Composable
-import com.example.rma1.views.ScreenBase
+import com.example.rma1.views.core.shared.ScreenBase
 
 @Composable
 fun FavoritesScreen(

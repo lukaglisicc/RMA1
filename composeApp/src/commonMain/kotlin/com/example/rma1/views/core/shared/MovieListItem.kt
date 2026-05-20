@@ -1,4 +1,4 @@
-package com.example.rma1.views
+package com.example.rma1.views.core.shared
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -18,12 +18,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import com.example.rma1.movies.Movie
+import com.example.rma1.movies.MovieRepository
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun MovieListItem(
-    movie: Movie,
+    movie: MovieRepository.Movie,
     onClick: () -> Unit,
     onDeleteClick: (() -> Unit)? = null,
 ) {

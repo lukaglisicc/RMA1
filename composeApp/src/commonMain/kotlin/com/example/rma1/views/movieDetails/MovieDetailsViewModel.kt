@@ -3,7 +3,7 @@ package com.example.rma1.views.movieDetails
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.rma1.movieIdOrThrow
+import com.example.rma1.views.core.movieIdOrThrow
 import com.example.rma1.movies.MovieRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -50,10 +50,10 @@ class MovieDetailsViewModel (
                 movieRepository.getMovieDetails(movieId)
             }.fold(
                 onSuccess = { movieDetails ->
-                    setState { copy(movieDetailsFull = movieDetails, error = null) }
+                    setState { copy(movieDetails = movieDetails, error = null) }
                 },
                 onFailure = { error ->
-                    setState { copy(movieDetailsFull = null, error = error) }
+                    setState { copy(movieDetails = null, error = error) }
                 }
             )
             setState { copy(isLoading = false) }

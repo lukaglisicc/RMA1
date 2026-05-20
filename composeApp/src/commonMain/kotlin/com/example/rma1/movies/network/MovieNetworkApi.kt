@@ -1,4 +1,4 @@
-package com.example.rma1.movies
+package com.example.rma1.movies.network
 
 import de.jensklingenberg.ktorfit.http.GET
 import de.jensklingenberg.ktorfit.http.Path

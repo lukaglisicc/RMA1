@@ -1,5 +1,6 @@
-package com.example.rma1.movies
+package com.example.rma1.movies.network
 
+import com.example.rma1.movies.MovieRepository
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -13,7 +14,7 @@ import com.example.rma1.movies.MovieRepository.MoviesState
 import kotlin.Int
 
 
-class NetworkMovieRepository : MovieRepository{
+class NetworkMovieRepository : MovieRepository {
 
     private var pageSize: Int = 30
     private var sortBy: MovieRepository.SortType = MovieRepository.SortType.RATING
@@ -49,14 +50,14 @@ class NetworkMovieRepository : MovieRepository{
     //Flow setup
     private val _movies = MutableStateFlow(MoviesState())
 
-    private val _filters = MutableStateFlow(Filters())
+    private val _filters = MutableStateFlow(MovieRepository.Filters())
 
     private var config: List<ConfigPair>? = null
 
 
     override fun observeMovies(): Flow<MoviesState> = _movies.asStateFlow()
 
-    override fun observeFilters(): Flow<Filters> = _filters.asStateFlow()
+    override fun observeFilters(): Flow<MovieRepository.Filters> = _filters.asStateFlow()
 
     override suspend fun setQueryFilters(
         genreId: Int?,
@@ -94,7 +95,7 @@ class NetworkMovieRepository : MovieRepository{
         )
     }
 
-    override suspend fun getMovieDetails(id: String): MovieDetailsFull {
+    override suspend fun getMovieDetails(id: String): MovieRepository.MovieDetails {
         var movieDetails =  api.getMovieDetails(id)
         movieDetails = movieDetails.copy(
             posterPath = getImageUrl(path = movieDetails.posterPath, 2),
@@ -103,11 +104,11 @@ class NetworkMovieRepository : MovieRepository{
         val imagePaths = getMovieImages(id)
         val cast = getMovieCast(id)
         val trailerPath = api.getMovieTrailers(id)[0].key
-        return MovieDetailsFull(movieDetails, imagePaths, cast, trailerPath)
+        return MovieDetailsFull(movieDetails, imagePaths, cast, trailerPath).toRepositoryMovieDetails()
     }
 
-    override suspend fun getGenres(): List<Genre> {
-        return api.getGenres()
+    override suspend fun getGenres(): List<MovieRepository.Genre> {
+        return api.getGenres().map { it.toRepositoryGenre() }
     }
 
     suspend fun loadMovies(
@@ -139,7 +140,7 @@ class NetworkMovieRepository : MovieRepository{
             )
             _movies.update {
                 it.copy(
-                    movieResponse = movieResponse,
+                    movieResponse = movieResponse.toRepositoryMovieResponse(),
                     isLoading = false,
                 )
             }
@@ -239,6 +240,57 @@ class NetworkMovieRepository : MovieRepository{
             MovieRepository.SortType.YEAR -> "year"
             MovieRepository.SortType.TITLE -> "title"
         }
+    }
+
+    private fun MovieDetailsFull.toRepositoryMovieDetails() : MovieRepository.MovieDetails{
+        return MovieRepository.MovieDetails(
+            title = this.movieDetails.title,
+            desc = this.movieDetails.desc,
+            budget = this.movieDetails.budget,
+            revenue = this.movieDetails.revenue,
+            languageCode = this.movieDetails.languageCode,
+            popularity = this.movieDetails.popularity,
+            imdbRating = this.movieDetails.imdbRating,
+            posterPath = this.movieDetails.posterPath,
+            backdropPath = this.movieDetails.backdropPath,
+            genres = this.movieDetails.genres.map { it.toRepositoryGenre() },
+            trailerPath = this.trailerPath,
+            imagePaths = this.imagePaths,
+            cast = this.cast.map { it.toRespositoryCast() }
+        )
+    }
+
+    private fun Genre.toRepositoryGenre() : MovieRepository.Genre{
+        return MovieRepository.Genre(
+            id = this.id,
+            name = this.name,
+        )
+    }
+
+    private fun Cast.toRespositoryCast() : MovieRepository.Cast{
+        return MovieRepository.Cast(
+            name = this.name,
+            profilePath = this.profilePath ?: "",
+        )
+    }
+
+    private fun MovieResponse.toRepositoryMovieResponse() : MovieRepository.MovieResponse{
+        return MovieRepository.MovieResponse(
+            totalItems = this.totalItems,
+            items = this.items.map { it.toRepositoryMovie() },
+        )
+    }
+
+    private fun Movie.toRepositoryMovie() : MovieRepository.Movie{
+        return MovieRepository.Movie(
+            id = this.id,
+            title = this.title,
+            year = this.year,
+            rating = this.rating,
+            votes = this.votes,
+            genres = this.genres.map { it.toRepositoryGenre() },
+            posterPath = this.posterPath,
+        )
     }
 
 }
