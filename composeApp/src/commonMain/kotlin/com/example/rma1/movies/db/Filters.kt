@@ -6,7 +6,7 @@ data class Filters(
     val minYear: Int? = 1920,
     val maxYear: Int? = 2025,
     val minRating: Float? = 0F,
-    val sortType: SortType,
+    val sortType: SortType = SortType.RATING,
 )
 
 enum class SortType {

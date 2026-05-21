@@ -16,4 +16,9 @@ data class MovieWithGenres (
         ),
     )
     val genres: List<GenreEntity>,
+    @Relation(
+        parentColumn = "id",
+        entityColumn = "movieId",
+    )
+    val imagePaths: List<ImagePathEntity>
 )
