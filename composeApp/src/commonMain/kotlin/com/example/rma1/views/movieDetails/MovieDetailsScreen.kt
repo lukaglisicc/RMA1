@@ -82,6 +82,7 @@ private fun MovieDetailsScreen(
     ScreenBase(
         onBack = onClose,
         title = "",
+        transparent = true,
     ) { padding ->
         if (state.isLoading){
             Box(
@@ -92,7 +93,9 @@ private fun MovieDetailsScreen(
             ) {
                 CircularProgressIndicator()
             }
-        } else if (state.error != null) {
+        }
+
+        else if (state.error != null) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -101,7 +104,9 @@ private fun MovieDetailsScreen(
             ) {
                 Text(text = "Error: ${state.error.message}")
             }
-        } else if (state.movieDetails == null) {
+        }
+
+        else if (state.movieDetails == null) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -110,7 +115,9 @@ private fun MovieDetailsScreen(
             ) {
                 Text(text = "No movies details.")
             }
-        } else {
+        }
+
+        else {
             MovieDetailsContent(
                 movieDetails = state.movieDetails,
                 eventPublisher = eventPublisher,
@@ -129,7 +136,6 @@ private fun MovieDetailsContent(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .padding(padding),
     ){
         item {
             HeroSection(

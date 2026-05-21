@@ -12,6 +12,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -22,13 +23,21 @@ import androidx.compose.ui.unit.dp
 fun ScreenBase(
     title: String,
     onBack: () -> Unit,
+    transparent: Boolean = false,
     content: @Composable (PaddingValues) -> Unit,
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text(title) },
-                navigationIcon = { BackButton(onBack) }
+                navigationIcon = { BackButton(onBack) },
+                colors = if(transparent){
+                    TopAppBarDefaults.topAppBarColors(
+                        containerColor = Color.Transparent
+                    )
+                } else {
+                    TopAppBarDefaults.topAppBarColors()
+                }
             )
         }
     ) { paddingValues ->
