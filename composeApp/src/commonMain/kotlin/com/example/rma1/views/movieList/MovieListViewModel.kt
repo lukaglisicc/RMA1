@@ -32,22 +32,33 @@ class MovieListViewModel (
     init {
         observeFilters()
         observeMovies()
+        observeMovieCount()
         observeEvents()
-        viewModelScope.launch (Dispatchers.IO){
-            movieRepository.queryMovies()
-        }
+        refresh()
     }
 
     private fun observeMovies() {
         viewModelScope.launch {
             movieRepository
                 .observeMovies()
-                .collect { moviesState ->
+                .collect { movies ->
                     setState {
                         this.copy(
-                            movieResponse = moviesState.movieResponse,
-                            isLoading = moviesState.isLoading,
-                            error = moviesState.error,
+                            movies = movies,
+                        )
+                    }
+                }
+        }
+    }
+
+    private fun observeMovieCount() {
+        viewModelScope.launch {
+            movieRepository
+                .observeMovieCount()
+                .collect { movieCount ->
+                    setState {
+                        this.copy(
+                            movieCount = movieCount,
                         )
                     }
                 }
@@ -64,9 +75,6 @@ class MovieListViewModel (
                             filters = filters,
                         )
                     }
-                    withContext(Dispatchers.IO){
-                        movieRepository.queryMovies()
-                    }
                 }
         }
     }
@@ -76,7 +84,7 @@ class MovieListViewModel (
             events.collect { event ->
                 when(event){
                     is MovieListContract.UiEvent.SortMovies -> {
-                        sortMovies(event.sortBy, event.order)
+                        sortMovies(event.sortBy)
                     }
                 }
             }
@@ -86,16 +94,31 @@ class MovieListViewModel (
 
     private fun sortMovies(
         sortType: MovieRepository.SortType,
-        order: String,
     ){
         viewModelScope.launch {
-            movieRepository.setQuerySorting(
-                sortBy = sortType,
-                sortOrder = order,
+            movieRepository.setFilters(
+                _state.value.filters.copy(
+                    sortType = sortType,
+                )
             )
             withContext(Dispatchers.IO){
-                movieRepository.queryMovies()
+                runCatching {  movieRepository.queryMovies() }
+                    .onFailure { setState { copy(error = it) } }
             }
+        }
+    }
+
+    private fun refresh() {
+        viewModelScope.launch (Dispatchers.IO){
+            setState { copy(
+                isLoading = true,
+                error = null,
+            ) }
+            withContext(Dispatchers.IO){
+                runCatching {  movieRepository.queryMovies() }
+                    .onFailure { setState { copy(error = it) } }
+            }
+           setState { copy(isLoading = false) }
         }
     }
 

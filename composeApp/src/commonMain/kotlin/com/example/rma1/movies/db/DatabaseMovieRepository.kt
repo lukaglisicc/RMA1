@@ -1,135 +1,155 @@
 package com.example.rma1.movies.db
 
 import com.example.rma1.movies.MovieRepository
-import com.example.rma1.movies.MovieRepository.MoviesState
+import com.example.rma1.movies.db.entities.ImagePathEntity
+import com.example.rma1.movies.db.entities.MovieCastCrossRef
+import com.example.rma1.movies.network.ConfigPair
+import com.example.rma1.movies.network.ImageType
 import com.example.rma1.movies.network.MovieResponse
 import com.example.rma1.movies.network.NetworkMovieApi
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 
 class DatabaseMovieRepository(
     private val appDatabase: AppDatabase,
     private val movieApi: NetworkMovieApi,
 ) : MovieRepository {
 
+    private val _filters = MutableStateFlow(Filters())
+
+    private var config: List<ConfigPair>? = null
 
 
-    private val filters = Filters()
 
-    private val _movies = MutableStateFlow(MoviesState())
-
-    private val _filters = MutableStateFlow(MovieRepository.Filters())
-
-    init {
-        CoroutineScope(context = Dispatchers.IO).launch { observeDBMovies() }
-    }
-
-    override fun observeMovies(): Flow<MoviesState> = _movies.asStateFlow()
-
-    private suspend fun observeDBMovies(){
-        appDatabase.movieDao()
-            .observeMovies(buildMovieQuery(filters))
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun observeMovies(): Flow<List<MovieRepository.Movie>> =
+        _filters.flatMapLatest { filters ->
+            appDatabase.movieDao().observeMovies(buildMovieQuery(filters))
+        }
             .distinctUntilChanged()
             .map { value -> value.map { it.toRepositoryMovie() } }
-            .collect { movies ->
-                _movies.update {
-                    it.copy(
-                        movieResponse = MovieRepository.MovieResponse(
-                            items = movies,
-                            totalItems = appDatabase.movieDao().getMovieCount(),
-                        )
-                    )
-                }
-            }
+
+
+    override fun observeMovieDetails(id: String): Flow<MovieRepository.MovieDetails?> =
+        appDatabase.movieDao().observeMovieDetails(id)
+            .map{ value -> value?.toRepositoryMovieDetails()}
+
+    override fun observeMovieCount(): Flow<Int> =
+        appDatabase.movieDao().observeMovieCount()
+
+    override suspend fun setFilters(filters: MovieRepository.Filters) {
+        _filters.update { filters.toDatabaseFilters() }
+        queryMovies()
     }
-
-
 
     override fun observeFilters(): Flow<MovieRepository.Filters> {
-        return _filters.asStateFlow()
+        return _filters.asStateFlow().map { it.toRepositoryFilters() }
     }
 
-    override suspend fun setQueryFilters(
-        genreId: Int?,
-        query: String?,
-        minYear: Int?,
-        maxYear: Int?,
-        minRating: Float?
-    ) {
-        //
-    }
-
-    override suspend fun setQuerySorting(
-        sortBy: MovieRepository.SortType,
-        sortOrder: String
-    ) {
-        //
-    }
 
     override suspend fun queryMovies() {
-        _movies.update {
-            it.copy(
-                isLoading = true,
-                error = null,
+            val response = movieApi.getMovies(_filters.value)
+            appDatabase.movieDao().upsertMovies(response.items
+                .map {
+                    it.toMovieEntity().copy(
+                    posterPath = getImageUrl(it.posterPath, 1),
+                ) }
             )
-        }
-        try {
-            val response = movieApi.getMovies(filters)
-            appDatabase.movieDao().upsertMovies(response.items.map { it.toMovieEntity() })
             response.items.forEach { movie ->
                 appDatabase.movieDao().upsertGenres(movie.genres.map { it.toGenreEntity() })
                 appDatabase.movieDao().upsertMoviesGenres(movie.toMoviesGenres())
-
             }
-
-            _movies.update {
-                it.copy(
-                    isLoading = false,
-                )
-            }
-        } catch (e: Exception){
-            _movies.update {
-                it.copy(
-                    isLoading = false,
-                    error = e,
-                )
-            }
-        }
-
-
     }
 
-    override suspend fun getMovieDetails(id: String): MovieRepository.MovieDetails {
-        return MovieRepository.MovieDetails(
-            title = "",
-            desc = "",
-            budget = 0,
-            revenue = 0,
-            languageCode = "",
-            popularity = 0f,
-            imdbRating = 0f,
-            posterPath = "",
-            backdropPath = "",
-            genres = emptyList(),
-            trailerPath = "",
-            imagePaths = emptyList(),
-            cast = emptyList(),
+    override suspend fun refreshMovieDetails(id: String) {
+        val details = movieApi.getMovieDetails(id)
+        appDatabase.movieDao().upsertMovieDetails(
+            details
+                .toMovieDetailsEntity()
+                .let{
+                    it.copy(
+                        posterPath = getImageUrl(it.posterPath, 2),
+                        backdropPath = getImageUrl(it.backdropPath, 2, ImageType.BACKDROP),
+                        trailerPath = movieApi.getMovieTrailers(it.movieId)[0].key,
+                    )
+                }
         )
+        val cast = movieApi.getMovieCast(id).items.map {
+            it.copy(
+                profilePath = getImageUrl(it.profilePath, 1, ImageType.PROFILE)
+            )
+        }
+        appDatabase.movieDao().upsertCast(cast.map { it.toCastEntity() })
+        appDatabase.movieDao().upsertMovieCast(cast.map {
+            MovieCastCrossRef(id, it.id)
+        })
+        val images = movieApi.getMovieImages(id).backdrops.map {
+            getImageUrl(it.filePath, 0, ImageType.BACKDROP)
+        }
+        appDatabase.movieDao().insertImagePaths(images.map {
+            ImagePathEntity(
+                movieId = id,
+                path = it)
+        })
+
     }
 
-    override suspend fun getGenres(): List<MovieRepository.Genre> {
-        return emptyList()
+    override suspend fun getGenres(): List<MovieRepository.Genre> =
+        appDatabase.movieDao().getGenres().map { it.toRepositoryGenre() }
+
+    private suspend fun getImageUrl(path: String?, quality: Int, imageType: ImageType = ImageType.POSTER): String {
+        path ?: return ""
+
+        config = config ?: movieApi.getImageConfig()
+
+        val cfg = config ?: error("Config not loaded")
+
+
+        val baseUrl = cfg[0].value
+        val sizeList = cfg[imageType.id].value.split(",")
+
+        val size = sizeList.getOrNull(quality)
+            ?: sizeList.first()
+
+
+        return "$baseUrl$size$path"
     }
+
 }
 
 private suspend fun NetworkMovieApi.getMovies(filters: Filters): MovieResponse {
-    return getMovies()
+    return getMovies(
+        pageSize = 30,
+        sortBy = mapSort(filters.sortType),
+        sortOrder = mapSortOrder(filters.sortType),
+        genreId = filters.genreId,
+        query = filters.query,
+        minYear = filters.minYear,
+        maxYear = filters.maxYear,
+        minRating = filters.minRating,
+    )
+}
+
+private fun mapSort(sortType: SortType) : String{
+    return when(sortType){
+        SortType.RATING -> "imdb_rating"
+        SortType.POPULARITY -> "popularity"
+        SortType.YEAR -> "year"
+        SortType.TITLE -> "title"
+    }
+}
+
+private fun mapSortOrder(sortType: SortType) : String{
+    return when(sortType){
+        SortType.RATING -> "desc"
+        SortType.POPULARITY -> "desc"
+        SortType.YEAR -> "desc"
+        SortType.TITLE -> "asc"
+    }
 }

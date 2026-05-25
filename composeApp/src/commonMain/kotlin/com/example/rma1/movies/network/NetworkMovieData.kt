@@ -81,12 +81,6 @@ data class ConfigPair(
     val key: String,
     val value: String,
 )
-data class MovieDetailsFull(
-    val movieDetails: MovieDetails,
-    val imagePaths: List<String>,
-    val cast: List<Cast>,
-    val trailerPath: String,
-)
 
 @Serializable
 data class MovieImage(
@@ -102,3 +96,9 @@ data class Backdrops(
 data class Trailer (
     val key: String,
 )
+enum class ImageType(val id: Int){
+    POSTER(1),
+    BACKDROP(2),
+    PROFILE(3),
+    LOGO(4),
+}

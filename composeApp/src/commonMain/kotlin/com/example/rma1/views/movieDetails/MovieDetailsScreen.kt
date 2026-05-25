@@ -113,7 +113,7 @@ private fun MovieDetailsScreen(
                     .padding(padding),
                 contentAlignment = Alignment.Center,
             ) {
-                Text(text = "No movies details.")
+                Text(text = "No movie details.")
             }
         }
 

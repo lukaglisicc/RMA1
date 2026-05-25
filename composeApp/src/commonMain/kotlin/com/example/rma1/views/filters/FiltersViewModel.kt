@@ -96,12 +96,15 @@ class FiltersViewModel(
         maxYear: Int? = null,
         minRating: Float? = null,
     ) {
-        movieRepository.setQueryFilters(
-            genreId = genreId,
-            query = query,
-            minYear = minYear,
-            maxYear = maxYear,
-            minRating = minRating,
+        movieRepository.setFilters(
+            MovieRepository.Filters(
+                genreId = genreId,
+                query = query,
+                minYear = minYear,
+                maxYear = maxYear,
+                minRating = minRating,
+                sortType = _state.value.filters.sortType,
+            )
         )
         setEffect(FiltersContract.SideEffect.FiltersApplied)
     }

@@ -21,17 +21,13 @@ interface MovieRepository {
         val posterPath: String,
     )
 
-    data class MovieResponse(
-        val totalItems: Int,
-        val items: List<Movie>,
-    )
-
     data class Filters(
         val genreId: Int? = null,
         val query: String? = null,
         val minYear: Int? = 1920,
         val maxYear: Int? = 2025,
         val minRating: Float? = 0F,
+        val sortType: SortType = SortType.RATING,
     ) {
         fun appliedFilters() : Int {
             var i = 0
@@ -70,32 +66,20 @@ interface MovieRepository {
         val profilePath: String,
     )
 
-    data class MoviesState(
-        val movieResponse: MovieResponse? = null,
-        val isLoading: Boolean = true,
-        val error: Throwable? = null,
-    )
 
-    fun observeMovies(): Flow<MoviesState>
+    fun observeMovies(): Flow<List<Movie>>
 
     fun observeFilters(): Flow<Filters>
 
-    suspend fun setQueryFilters(
-        genreId: Int? = null,
-        query: String? = null,
-        minYear: Int? = null,
-        maxYear: Int? = null,
-        minRating: Float? = null
-    )
+    fun observeMovieDetails(id: String): Flow<MovieDetails?>
 
-    suspend fun setQuerySorting(
-        sortBy: SortType,
-        sortOrder: String,
-    )
+    fun observeMovieCount(): Flow<Int>
+
+    suspend fun setFilters(filters: Filters)
 
     suspend fun queryMovies()
 
-    suspend fun getMovieDetails(id: String) : MovieDetails
+    suspend fun refreshMovieDetails(id: String)
 
     suspend fun getGenres() : List<Genre>
 

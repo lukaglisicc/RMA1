@@ -66,7 +66,8 @@ fun MainScreen(
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val error = state.error
-    val movieResponse = state.movieResponse
+    val movies = state.movies
+    val movieCount = state.movieCount
     val eventPublisher = viewModel::setEvent
 
 
@@ -143,7 +144,7 @@ fun MainScreen(
                     }
 
                     Text(
-                        text = "${((movieResponse?.totalItems ?: 0).toString())} movies",
+                        text = "${((movieCount).toString())} movies",
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 40.dp),
@@ -176,7 +177,7 @@ fun MainScreen(
                     }
                 }
 
-                else if (movieResponse?.items?.isEmpty() ?: true) {
+                else if (movies.isEmpty()) {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -193,7 +194,7 @@ fun MainScreen(
                             .fillMaxSize()
                             .padding(paddingValues)
                     ) {
-                        items(movieResponse.items) { movie ->
+                        items(movies) { movie ->
                             MovieListItem(
                                 movie = movie,
                                 onClick = {onMovieClick(movie.id)}
@@ -278,7 +279,7 @@ private fun SortButton(
                 text = {Text("Title")},
                 onClick = {
                     isSortExpanded = false
-                    eventPublisher(MovieListContract.UiEvent.SortMovies(MovieRepository.SortType.TITLE, "asc"))
+                    eventPublisher(MovieListContract.UiEvent.SortMovies(MovieRepository.SortType.TITLE))
                 },
             )
         }

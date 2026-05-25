@@ -39,24 +39,17 @@ class MovieDetailsViewModel (
 
 
     init {
-        loadMovieDetails(argMovieId)
+        observeMovieDetails()
         observeEvents()
+        refresh()
     }
 
-    private fun loadMovieDetails(movieId: String){
-        viewModelScope.launch{
-            setState { copy(isLoading = true) }
-            runCatching {
-                movieRepository.getMovieDetails(movieId)
-            }.fold(
-                onSuccess = { movieDetails ->
-                    setState { copy(movieDetails = movieDetails, error = null) }
-                },
-                onFailure = { error ->
-                    setState { copy(movieDetails = null, error = error) }
-                }
-            )
-            setState { copy(isLoading = false) }
+
+    private fun observeMovieDetails() {
+        viewModelScope.launch {
+            movieRepository.observeMovieDetails(argMovieId).collect { details ->
+                setState { copy(movieDetails = details) }
+            }
         }
     }
 
@@ -69,6 +62,20 @@ class MovieDetailsViewModel (
                     }
                 }
             }
+        }
+    }
+
+    private fun refresh() {
+        viewModelScope.launch {
+            setState { copy(
+                isLoading = true,
+                error = null
+            ) }
+            runCatching {
+                movieRepository.refreshMovieDetails(argMovieId)
+            }
+                .onFailure { setState { copy(error = it) } }
+            setState { copy(isLoading = false) }
         }
     }
 }
