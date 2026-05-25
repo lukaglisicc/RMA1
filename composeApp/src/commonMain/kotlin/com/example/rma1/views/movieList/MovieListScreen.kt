@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
@@ -63,7 +65,6 @@ fun MainScreen(
     val state by viewModel.state.collectAsState()
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    val scrollState = rememberScrollState()
     val error = state.error
     val movieResponse = state.movieResponse
     val eventPublisher = viewModel::setEvent
@@ -187,13 +188,12 @@ fun MainScreen(
                 }
 
                 else {
-                    Column(
+                    LazyColumn(
                         modifier = Modifier
                             .fillMaxSize()
                             .padding(paddingValues)
-                            .verticalScroll(state = scrollState)
                     ) {
-                        movieResponse.items.forEach { movie ->
+                        items(movieResponse.items) { movie ->
                             MovieListItem(
                                 movie = movie,
                                 onClick = {onMovieClick(movie.id)}
