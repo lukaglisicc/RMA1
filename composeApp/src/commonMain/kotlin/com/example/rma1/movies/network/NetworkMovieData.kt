@@ -102,3 +102,63 @@ enum class ImageType(val id: Int){
     PROFILE(3),
     LOGO(4),
 }
+
+@Serializable
+data class SignUpInfo(
+    @SerialName("full_name")
+    val name : String,
+    val username: String,
+    val password: String,
+)
+
+@Serializable
+data class LogInInfo(
+    val username: String,
+    val password: String,
+)
+
+@Serializable
+data class AuthToken(
+    @SerialName("access_token")
+    val token: String,
+)
+
+@Serializable
+data class User(
+    val username: String,
+)
+
+@Serializable
+data class LeaderboardEntry(
+    val rank: Int,
+    @SerialName("user_id")
+    val id: Int,
+    val username: String,
+    @SerialName("full_name")
+    val fullName: String,
+    val score: Float,
+    @SerialName("played_at")
+    val timestamp: Long,
+    @SerialName("total_plays")
+    val playCount: Int,
+)
+
+@Serializable
+data class QuizResult(
+    val score: Float,
+    val category: Int = 1,
+)
+
+@Serializable
+data class QuizResultWithTimestamp(
+    val score: Float,
+    val category: Int,
+    @SerialName("played_at")
+    val timestamp: Long,
+)
+
+@Serializable
+data class QuizResultFull(
+    val result: QuizResultWithTimestamp,
+    val ranking: Int,
+)

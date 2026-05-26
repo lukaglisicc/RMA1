@@ -85,6 +85,10 @@ kotlin {
             implementation(libs.room.runtime)
             implementation(libs.sqlite.bundled)
 
+            // DataStore KMP with Okio
+            implementation(libs.datastore.core)
+            implementation(libs.datastore.core.okio)
+            implementation(libs.okio)
 
         }
         commonTest.dependencies {

@@ -13,6 +13,7 @@ fun initKoin(config: KoinAppDeclaration? = null): KoinApplication {
             repositoryModule,
             databaseModule(),
             networkModule,
+            authModule,
         )
     }
 }

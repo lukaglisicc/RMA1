@@ -1,6 +1,9 @@
 package com.example.rma1.movies.network
 
+import de.jensklingenberg.ktorfit.http.Body
+import de.jensklingenberg.ktorfit.http.DELETE
 import de.jensklingenberg.ktorfit.http.GET
+import de.jensklingenberg.ktorfit.http.POST
 import de.jensklingenberg.ktorfit.http.Path
 import de.jensklingenberg.ktorfit.http.Query
 
@@ -45,4 +48,54 @@ interface NetworkMovieApi {
     suspend fun getMovieTrailers(
         @Path("id") id: String
     ): List<Trailer>
+
+    @POST("/auth/signup")
+    suspend fun signUp(
+        @Body signUpInfo: SignUpInfo,
+    ): AuthToken
+
+    @POST("/auth/login")
+    suspend fun logIn(
+        @Body logInInfo: LogInInfo,
+    ): AuthToken
+
+    @GET("/me")
+    suspend fun getUser(): User
+
+    @GET("/me/favorites")
+    suspend fun getFavorites(): List<Movie>
+
+    @POST("/me/favorites/{movie_id}")
+    suspend fun addFavorite(
+        @Path("movie_id") id: String,
+    )
+
+    @DELETE("/me/favorites/{movie_id}")
+    suspend fun deleteFavorite(
+        @Path("movie_id") id: String,
+    )
+
+    @GET("/me/watchlist")
+    suspend fun getWatchlist(): List<Movie>
+
+    @POST("/me/watchlist/{movie_id}")
+    suspend fun addToWatchlist(
+        @Path("movie_id") id: String,
+    )
+
+    @DELETE("/me/watchlist/{movie_id}")
+    suspend fun deleteFromWatchlist(
+        @Path("movie_id") id: String,
+    )
+
+    @GET("/leaderboard")
+    suspend fun getLeaderboard(): List<LeaderboardEntry>
+
+    @POST("/leaderboard")
+    suspend fun submitQuizResult(
+        @Body quizResult: QuizResult,
+    ): QuizResultFull
+
+    @GET("/me/quiz-results")
+    suspend fun getQuizResults(): List<QuizResultWithTimestamp>
 }
