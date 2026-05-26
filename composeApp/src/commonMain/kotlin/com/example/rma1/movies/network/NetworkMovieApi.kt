@@ -49,16 +49,6 @@ interface NetworkMovieApi {
         @Path("id") id: String
     ): List<Trailer>
 
-    @POST("/auth/signup")
-    suspend fun signUp(
-        @Body signUpInfo: SignUpInfo,
-    ): AuthToken
-
-    @POST("/auth/login")
-    suspend fun logIn(
-        @Body logInInfo: LogInInfo,
-    ): AuthToken
-
     @GET("/me")
     suspend fun getUser(): User
 

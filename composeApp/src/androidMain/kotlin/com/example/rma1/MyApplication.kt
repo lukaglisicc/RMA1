@@ -9,6 +9,7 @@ class MyApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        AppContextHolder.init(this)
         initKoin {
             androidContext(this@MyApplication)
         }

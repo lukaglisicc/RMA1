@@ -118,12 +118,6 @@ data class LogInInfo(
 )
 
 @Serializable
-data class AuthToken(
-    @SerialName("access_token")
-    val token: String,
-)
-
-@Serializable
 data class User(
     val username: String,
 )

@@ -3,9 +3,11 @@ package com.example.rma1.di
 import com.example.rma1.auth.AuthStore
 import com.example.rma1.auth.model.AuthState
 import com.example.rma1.movies.network.NetworkMovieApi
-import com.example.rma1.movies.network.Qualifiers
+import com.example.rma1.networking.Qualifiers
 import com.example.rma1.movies.network.createNetworkMovieApi
 import com.example.rma1.networking.HttpClientFactory
+import com.example.rma1.networking.auth.NetworkAuthApi
+import com.example.rma1.networking.auth.createNetworkAuthApi
 import de.jensklingenberg.ktorfit.Ktorfit
 import io.ktor.client.HttpClient
 import io.ktor.client.HttpClientConfig
@@ -33,10 +35,18 @@ val networkModule = module {
 
     single<NetworkMovieApi> {
         Ktorfit.Builder()
-            .httpClient(get<HttpClient>(Qualifiers.Unauthenticated))
+            .httpClient(get<HttpClient>(Qualifiers.Authenticated))
             .baseUrl("https://rma.finlab.rs/")
             .build()
             .createNetworkMovieApi()
+    }
+
+    single<NetworkAuthApi> {
+        Ktorfit.Builder()
+            .httpClient(get<HttpClient>(Qualifiers.Unauthenticated))
+            .baseUrl("https://rma.finlab.rs/")
+            .build()
+            .createNetworkAuthApi()
     }
 }
 

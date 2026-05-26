@@ -16,6 +16,8 @@ interface MovieListContract {
         data class SortMovies(
             val sortBy: MovieRepository.SortType,
             ) : UiEvent()
+
+        data object LogOut: UiEvent()
     }
 
 

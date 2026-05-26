@@ -99,6 +99,14 @@ fun MainScreen(
                     onQuizClick,
                     drawerState,
                 )
+
+                DrawerMenuItem(
+                    "Log Out",
+                    {
+                        eventPublisher(MovieListContract.UiEvent.LogOut)
+                    },
+                    drawerState,
+                )
             }
         }
     ) {

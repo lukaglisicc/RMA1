@@ -1,6 +1,9 @@
 package com.example.rma1.views.core
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.navigation.NavController
 import androidx.navigation.NavType
@@ -8,10 +11,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.example.rma1.auth.AuthStore
+import com.example.rma1.auth.model.AuthState
 import com.example.rma1.views.favorites.FavoritesScreen
 import com.example.rma1.views.favorites.FavoritesViewModel
 import com.example.rma1.views.filters.FiltersScreen
 import com.example.rma1.views.filters.FiltersViewModel
+import com.example.rma1.views.logIn.LogInScreen
+import com.example.rma1.views.logIn.LogInViewModel
 import com.example.rma1.views.movieList.MainScreen
 import com.example.rma1.views.movieList.MovieListViewModel
 import com.example.rma1.views.movieDetails.MovieDetailsScreen
@@ -20,22 +27,66 @@ import com.example.rma1.views.profile.ProfileScreen
 import com.example.rma1.views.profile.ProfileViewModel
 import com.example.rma1.views.quiz.QuizScreen
 import com.example.rma1.views.quiz.QuizViewModel
+import com.example.rma1.views.signUp.SignUpScreen
+import com.example.rma1.views.signUp.SignUpViewModel
 import com.example.rma1.views.watchlist.WatchlistScreen
 import com.example.rma1.views.watchlist.WatchlistViewModel
+import com.example.rma1.views.welcome.WelcomeScreen
 import org.koin.compose.viewmodel.koinViewModel
 
 
 @Composable
 fun Navigation(
     startDestination: String,
+    authStore: AuthStore,
 ) {
 
     val navController = rememberNavController()
+    val authState by authStore.authState.collectAsState()
+
+    LaunchedEffect(authState){
+        when(authState){
+            is AuthState.Authenticated -> { navController.navigate("main") }
+            is AuthState.Unauthenticated -> { navController.navigate("welcome") }
+        }
+    }
 
     NavHost(
         navController = navController,
         startDestination = startDestination,
     ) {
+
+        composable (
+            route = "welcome"
+        ) {
+            WelcomeScreen(
+                onLogInClick = { navController.navigate("logIn") },
+                onSignUpClick = { navController.navigate("signUp") },
+            )
+        }
+
+        composable (
+            route = "logIn"
+        ) {
+            val viewModel = koinViewModel<LogInViewModel>()
+            LogInScreen(
+                viewModel = viewModel,
+                onBackClick = { navController.navigate("welcome") },
+                onSignUpClick = { navController.navigate("signUp") },
+            )
+        }
+
+        composable (
+            route = "signUp"
+        ) {
+            val viewModel = koinViewModel<SignUpViewModel>()
+            SignUpScreen(
+                viewModel = viewModel,
+                onBackClick = { navController.navigate("welcome") },
+                onLogInClick = { navController.navigate("logIn") },
+            )
+        }
+
         composable(
             route = "main"
         ) {

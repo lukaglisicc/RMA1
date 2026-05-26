@@ -1,4 +1,4 @@
-package com.example.rma1.movies.network
+package com.example.rma1.networking
 
 import org.koin.core.qualifier.named
 
