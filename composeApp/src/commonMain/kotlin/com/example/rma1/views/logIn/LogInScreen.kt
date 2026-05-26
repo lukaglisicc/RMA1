@@ -112,6 +112,7 @@ private fun MainScreen(
             onValueChange = {
                 username = it
                 eventPublisher(LogInContract.UiEvent.UsernameUpdate)
+                eventPublisher(LogInContract.UiEvent.PasswordUpdate)
             },
             modifier = Modifier.fillMaxWidth(),
             label = { Text("Username") },
@@ -131,6 +132,7 @@ private fun MainScreen(
             onValueChange = {
                 password = it
                 eventPublisher(LogInContract.UiEvent.PasswordUpdate)
+                eventPublisher(LogInContract.UiEvent.UsernameUpdate)
             },
             modifier = Modifier.fillMaxWidth(),
             label = { Text("Password") },

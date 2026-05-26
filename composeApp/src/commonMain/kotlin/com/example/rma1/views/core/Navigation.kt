@@ -11,6 +11,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.navigation.navigation
 import com.example.rma1.auth.AuthStore
 import com.example.rma1.auth.model.AuthState
 import com.example.rma1.views.favorites.FavoritesScreen
@@ -37,7 +38,6 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun Navigation(
-    startDestination: String,
     authStore: AuthStore,
 ) {
 
@@ -46,138 +46,165 @@ fun Navigation(
 
     LaunchedEffect(authState){
         when(authState){
-            is AuthState.Authenticated -> { navController.navigate("main") }
-            is AuthState.Unauthenticated -> { navController.navigate("welcome") }
+            is AuthState.Authenticated -> {
+                navController.navigate("mainNav") {
+                    popUpTo("authNav"){
+                        inclusive = true
+                    }
+                    launchSingleTop = true
+                }
+            }
+            is AuthState.Unauthenticated -> {
+                navController.navigate("authNav") {
+                    popUpTo("mainNav"){
+                        inclusive = true
+                    }
+                    launchSingleTop = true
+                }
+            }
         }
     }
 
     NavHost(
         navController = navController,
-        startDestination = startDestination,
+        startDestination = when(authState){
+            is AuthState.Authenticated -> "authNav"
+            AuthState.Unauthenticated -> "mainNav"
+        },
     ) {
 
-        composable (
-            route = "welcome"
+        navigation(
+            route = "authNav",
+            startDestination = "welcome"
         ) {
-            WelcomeScreen(
-                onLogInClick = { navController.navigate("logIn") },
-                onSignUpClick = { navController.navigate("signUp") },
-            )
+            composable (
+                route = "welcome"
+            ) {
+                WelcomeScreen(
+                    onLogInClick = { navController.navigate("logIn") },
+                    onSignUpClick = { navController.navigate("signUp") },
+                )
+            }
+
+            composable (
+                route = "logIn"
+            ) {
+                val viewModel = koinViewModel<LogInViewModel>()
+                LogInScreen(
+                    viewModel = viewModel,
+                    onBackClick = { navController.navigate("welcome") },
+                    onSignUpClick = { navController.navigate("signUp") },
+                )
+            }
+
+            composable (
+                route = "signUp"
+            ) {
+                val viewModel = koinViewModel<SignUpViewModel>()
+                SignUpScreen(
+                    viewModel = viewModel,
+                    onBackClick = { navController.navigate("welcome") },
+                    onLogInClick = { navController.navigate("logIn") },
+                )
+            }
         }
 
-        composable (
-            route = "logIn"
+        navigation(
+            route = "mainNav",
+            startDestination = "main",
         ) {
-            val viewModel = koinViewModel<LogInViewModel>()
-            LogInScreen(
-                viewModel = viewModel,
-                onBackClick = { navController.navigate("welcome") },
-                onSignUpClick = { navController.navigate("signUp") },
-            )
-        }
+            composable(
+                route = "main"
+            ) {
+                val viewModel = koinViewModel<MovieListViewModel>()
+                MainScreen(
+                    viewModel = viewModel,
+                    onMovieClick = { navController.navigateToMovie(it) },
+                    onFiltersClick = { navController.navigate("filters")},
+                    onFavoritesClick = {navController.navigate("favorites")},
+                    onProfileClick = {navController.navigate("profile")},
+                    onQuizClick = {navController.navigate("quiz")},
+                    onWatchlistClick = {navController.navigate("watchlist")},
+                )
+            }
 
-        composable (
-            route = "signUp"
-        ) {
-            val viewModel = koinViewModel<SignUpViewModel>()
-            SignUpScreen(
-                viewModel = viewModel,
-                onBackClick = { navController.navigate("welcome") },
-                onLogInClick = { navController.navigate("logIn") },
-            )
-        }
+            composable(
+                route = "filters"
+            ) {
+                val viewModel = koinViewModel<FiltersViewModel>()
+                FiltersScreen(
+                    viewModel = viewModel,
+                    onClose = {
+                        navController.navigateUp()
+                    },
+                )
+            }
 
-        composable(
-            route = "main"
-        ) {
-            val viewModel = koinViewModel<MovieListViewModel>()
-            MainScreen(
-                viewModel = viewModel,
-                onMovieClick = { navController.navigateToMovie(it) },
-                onFiltersClick = { navController.navigate("filters")},
-                onFavoritesClick = {navController.navigate("favorites")},
-                onProfileClick = {navController.navigate("profile")},
-                onQuizClick = {navController.navigate("quiz")},
-                onWatchlistClick = {navController.navigate("watchlist")},
-            )
-        }
+            composable(
+                route = "main/{$MOVIE_ID}",
+                arguments = listOf(
+                    navArgument(MOVIE_ID) {
+                        type = NavType.StringType
+                        nullable = false
+                    }
+                ),
+            ){
+                val viewModel = koinViewModel<MovieDetailsViewModel>()
+                MovieDetailsScreen(
+                    viewModel = viewModel,
+                    onClose = {
+                        navController.navigateUp()
+                    },
+                )
+            }
 
-        composable(
-            route = "filters"
-        ) {
-            val viewModel = koinViewModel<FiltersViewModel>()
-            FiltersScreen(
-                viewModel = viewModel,
-                onClose = {
-                    navController.navigateUp()
-                },
-            )
-        }
+            composable(
+                route = "favorites"
+            ) {
+                val viewModel = koinViewModel<FavoritesViewModel>()
+                FavoritesScreen(
+                    viewModel = viewModel,
+                    onClose = {
+                        navController.navigateUp()
+                    },
+                )
+            }
 
-        composable(
-            route = "main/{$MOVIE_ID}",
-            arguments = listOf(
-                navArgument(MOVIE_ID) {
-                    type = NavType.StringType
-                    nullable = false
-                }
-            ),
-        ){
-            val viewModel = koinViewModel<MovieDetailsViewModel>()
-            MovieDetailsScreen(
-                viewModel = viewModel,
-                onClose = {
-                    navController.navigateUp()
-                },
-            )
-        }
+            composable(
+                route = "profile"
+            ) {
+                val viewModel = koinViewModel<ProfileViewModel>()
+                ProfileScreen(
+                    viewModel = viewModel,
+                    onClose = {
+                        navController.navigateUp()
+                    },
+                )
+            }
 
-        composable(
-            route = "favorites"
-        ) {
-            val viewModel = koinViewModel<FavoritesViewModel>()
-            FavoritesScreen(
-                viewModel = viewModel,
-                onClose = {
-                    navController.navigateUp()
-                },
-            )
-        }
+            composable(
+                route = "quiz"
+            ) {
+                val viewModel = koinViewModel<QuizViewModel>()
+                QuizScreen(
+                    viewModel = viewModel,
+                    onClose = {
+                        navController.navigateUp()
+                    },
+                )
+            }
 
-        composable(
-            route = "profile"
-        ) {
-            val viewModel = koinViewModel<ProfileViewModel>()
-            ProfileScreen(
-                viewModel = viewModel,
-                onClose = {
-                    navController.navigateUp()
-                },
-            )
-        }
-
-        composable(
-            route = "quiz"
-        ) {
-            val viewModel = koinViewModel<QuizViewModel>()
-            QuizScreen(
-                viewModel = viewModel,
-                onClose = {
-                    navController.navigateUp()
-                },
-            )
-        }
-
-        composable(
-            route = "watchlist"
-        ) {
-            val viewModel = koinViewModel<WatchlistViewModel>()
-            WatchlistScreen(
-                viewModel = viewModel,
-                onClose = {
-                    navController.navigateUp()
-                },
-            )
+            composable(
+                route = "watchlist"
+            ) {
+                val viewModel = koinViewModel<WatchlistViewModel>()
+                WatchlistScreen(
+                    viewModel = viewModel,
+                    onClose = {
+                        navController.navigateUp()
+                    },
+                )
+            }
         }
     }
 }

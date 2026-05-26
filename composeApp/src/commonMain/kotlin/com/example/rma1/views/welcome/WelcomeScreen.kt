@@ -38,6 +38,7 @@ fun WelcomeScreen(
                 text = "Welcome to Showtime",
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
             )
 
             Text(

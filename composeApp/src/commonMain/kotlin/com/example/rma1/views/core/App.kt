@@ -13,12 +13,10 @@ fun App() {
 
     val splashViewModel: SplashViewModel = koinViewModel()
     val bootState by splashViewModel.bootState.collectAsState()
-    val isLoggedIn by splashViewModel.isLoggedIn.collectAsState()
 
     when (bootState) {
         BootState.Success -> {
             Navigation(
-                startDestination = if (isLoggedIn) "main" else "welcome",
                 authStore = splashViewModel.authStore
             )
         }
