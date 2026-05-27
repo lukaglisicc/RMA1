@@ -5,12 +5,14 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.RoomDatabaseConstructor
 import com.example.rma1.movies.db.entities.CastEntity
+import com.example.rma1.movies.db.entities.FavoritesEntity
 import com.example.rma1.movies.db.entities.GenreEntity
 import com.example.rma1.movies.db.entities.ImagePathEntity
 import com.example.rma1.movies.db.entities.MovieCastCrossRef
 import com.example.rma1.movies.db.entities.MovieDetailsEntity
 import com.example.rma1.movies.db.entities.MovieEntity
 import com.example.rma1.movies.db.entities.MovieGenreCrossRef
+import com.example.rma1.movies.db.entities.WatchlistEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 
@@ -23,8 +25,10 @@ import kotlinx.coroutines.IO
         ImagePathEntity::class,
         MovieCastCrossRef::class,
         MovieGenreCrossRef::class,
+        FavoritesEntity::class,
+        WatchlistEntity::class,
     ],
-    version = 1,
+    version = 2,
     exportSchema = true,
 )
 @ConstructedBy(AppDatabaseConstructor::class)
@@ -42,6 +46,7 @@ fun buildAppDatabase(
 ): AppDatabase {
     return builder
         .fallbackToDestructiveMigrationOnDowngrade(dropAllTables = true)
+        .fallbackToDestructiveMigration(dropAllTables = true)
         .setQueryCoroutineContext(Dispatchers.IO)
         .build()
 }

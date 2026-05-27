@@ -6,12 +6,59 @@ fun buildMovieQuery(
     filters: Filters,
 ): RoomRawQuery {
 
-    val sql = StringBuilder(
+    val sql =
         """
         SELECT DISTINCT movies.*
         FROM movies
         """.trimIndent()
+
+    return commonSqlBuilder(
+        baseQuery = sql,
+        filters = filters,
     )
+}
+
+fun buildWatchlistQuery(
+    filters: Filters,
+): RoomRawQuery {
+
+    val sql =
+        """
+    SELECT DISTINCT movies.*
+    FROM movies
+    INNER JOIN watchlist w
+        ON movies.id = w.id
+    """.trimIndent()
+
+    return commonSqlBuilder(
+        baseQuery = sql,
+        filters = filters,
+    )
+}
+
+fun buildFavoritesQuery(
+    filters: Filters,
+): RoomRawQuery {
+
+    val sql =
+        """
+    SELECT DISTINCT movies.*
+    FROM movies
+    INNER JOIN favorites f
+        ON movies.id = f.id
+    """.trimIndent()
+
+    return commonSqlBuilder(
+        baseQuery = sql,
+        filters = filters,
+    )
+}
+
+private fun commonSqlBuilder(
+    baseQuery: String,
+    filters: Filters,
+) : RoomRawQuery {
+    val sql = StringBuilder(baseQuery)
 
     val bindings = mutableListOf<Any>()
 

@@ -1,6 +1,5 @@
 package com.example.rma1.views.movieList
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -8,15 +7,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -27,24 +22,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.rememberDrawerState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.example.rma1.movies.MovieRepository
+import com.example.rma1.views.core.shared.FilterButton
 import com.example.rma1.views.core.shared.MovieListItem
+import com.example.rma1.views.core.shared.SortButton
 import kotlinx.coroutines.launch
 
 
@@ -142,10 +132,14 @@ fun MainScreen(
                         verticalAlignment = Alignment.CenterVertically,
                     ){
 
-                        SortButton(eventPublisher)
+                        SortButton(
+                            eventPublisher = {
+                                eventPublisher(MovieListContract.UiEvent.SortMovies(it))
+                            }
+                        )
                         FilterButton(
                             onClick = onFiltersClick,
-                            state = state,
+                            appliedFilters = state.filters.appliedFilters(),
                         )
                     }
 
@@ -213,84 +207,6 @@ fun MainScreen(
     }
 }
 
-@Composable
-private fun FilterButton(
-    onClick: () -> Unit,
-    state: MovieListContract.UiState,
-){
-    Box{
-        Button(
-            onClick = onClick,
-            modifier = Modifier.padding(horizontal = 16.dp)
-        ){
-            Text("Filters")
-        }
-
-        if(state.filters.appliedFilters() > 0){
-            Box(
-                modifier = Modifier
-                    .align (Alignment.TopEnd)
-                    .offset(x = (-16).dp)
-                    .size(20.dp)
-                    .background(MaterialTheme.colorScheme.errorContainer, shape = CircleShape),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = state.filters.appliedFilters().toString(),
-                    style = MaterialTheme.typography.labelSmall,
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun SortButton(
-    eventPublisher: (MovieListContract.UiEvent) -> Unit,
-){
-    var isSortExpanded by remember {mutableStateOf(false)}
-
-    Box{
-        Button(
-            onClick = { isSortExpanded = true },
-        ){
-            Text("Sort")
-        }
-        DropdownMenu(
-            expanded = isSortExpanded,
-            onDismissRequest = { isSortExpanded = false },
-        ) {
-            DropdownMenuItem(
-                text = {Text("Rating")},
-                onClick = {
-                    isSortExpanded = false
-                    eventPublisher(MovieListContract.UiEvent.SortMovies(MovieRepository.SortType.RATING))
-                },
-            )
-            DropdownMenuItem(
-                text = {Text("Popularity")},
-                onClick = {
-                    isSortExpanded = false
-                    eventPublisher(MovieListContract.UiEvent.SortMovies(MovieRepository.SortType.POPULARITY))
-                },
-            )
-            DropdownMenuItem(
-                text = {Text("Year")},
-                onClick = {
-                    isSortExpanded = false
-                    eventPublisher(MovieListContract.UiEvent.SortMovies(MovieRepository.SortType.YEAR))
-                },
-            )
-            DropdownMenuItem(
-                text = {Text("Title")},
-                onClick = {
-                    isSortExpanded = false
-                    eventPublisher(MovieListContract.UiEvent.SortMovies(MovieRepository.SortType.TITLE))
-                },
-            )
-        }
-    }
-}
 
 @Composable
 private fun DrawerMenuItem(

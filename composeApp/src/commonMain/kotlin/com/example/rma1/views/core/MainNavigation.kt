@@ -49,7 +49,7 @@ fun MainNavigation(
                 MainScreen(
                     viewModel = viewModel,
                     onMovieClick = { navController.navigateToMovie(it) },
-                    onFiltersClick = { navController.navigate("filters")},
+                    onFiltersClick = { navController.navigate("filters/main")},
                     onFavoritesClick = {navController.navigate("favorites")},
                     onProfileClick = {navController.navigate("profile")},
                     onQuizClick = {navController.navigate("quiz")},
@@ -58,7 +58,13 @@ fun MainNavigation(
             }
 
             composable(
-                route = "filters"
+                route = "filters/{$FILTER_SOURCE}",
+                arguments = listOf(
+                    navArgument(FILTER_SOURCE) {
+                        type = NavType.StringType
+                        nullable = false
+                    }
+                ),
             ) {
                 val viewModel = koinViewModel<FiltersViewModel>()
                 FiltersScreen(
@@ -93,9 +99,9 @@ fun MainNavigation(
                 val viewModel = koinViewModel<FavoritesViewModel>()
                 FavoritesScreen(
                     viewModel = viewModel,
-                    onClose = {
-                        navController.navigateUp()
-                    },
+                    onClose = { navController.navigateUp() },
+                    onFiltersClick = { navController.navigate("filters/favorites") },
+                    onMovieClick = { navController.navigateToMovie(it) }
                 )
             }
 
@@ -129,9 +135,9 @@ fun MainNavigation(
                 val viewModel = koinViewModel<WatchlistViewModel>()
                 WatchlistScreen(
                     viewModel = viewModel,
-                    onClose = {
-                        navController.navigateUp()
-                    },
+                    onClose = { navController.navigateUp() },
+                    onMovieClick = { navController.navigateToMovie(it) },
+                    onFiltersClick = { navController.navigate("filters/watchlist")},
                 )
             }
         }
@@ -147,3 +153,7 @@ const val MOVIE_ID = "movieId"
 inline val SavedStateHandle.movieId: String? get() = get(MOVIE_ID)
 inline val SavedStateHandle.movieIdOrThrow: String get() = get(MOVIE_ID)
     ?: throw IllegalStateException("$MOVIE_ID is mandatory and can not be null")
+
+const val FILTER_SOURCE = "filterSource"
+inline val SavedStateHandle.filterSourceOrThrow: String get() = get(FILTER_SOURCE)
+    ?: throw IllegalStateException("$FILTER_SOURCE is mandatory and can not be null")

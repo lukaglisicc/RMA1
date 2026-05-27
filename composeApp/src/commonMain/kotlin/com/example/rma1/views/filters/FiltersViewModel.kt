@@ -1,8 +1,10 @@
 package com.example.rma1.views.filters
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.rma1.movies.MovieRepository
+import com.example.rma1.views.core.filterSourceOrThrow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -11,9 +13,11 @@ import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 
 class FiltersViewModel(
+    savedStateHandle: SavedStateHandle,
     private val movieRepository: MovieRepository,
 ): ViewModel() {
 
+    private val argSource = savedStateHandle.filterSourceOrThrow
     private val _state = MutableStateFlow(FiltersContract.UiState())
     val state = _state.asStateFlow()
 
@@ -59,15 +63,44 @@ class FiltersViewModel(
 
     private fun observeFilters() {
         viewModelScope.launch {
-            movieRepository
-                .observeFilters()
-                .collect { filters ->
-                    setState {
-                        this.copy(
-                            filters = filters,
-                        )
-                    }
+            when(argSource){
+                "main" -> {
+                    movieRepository
+                        .observeFilters()
+                        .collect { filters ->
+                            setState {
+                                this.copy(
+                                    filters = filters,
+                                )
+                            }
+                        }
                 }
+
+                "watchlist" -> {
+                    movieRepository
+                        .observeWatchlistFilters()
+                        .collect { filters ->
+                            setState {
+                                this.copy(
+                                    filters = filters,
+                                )
+                            }
+                        }
+                }
+
+                "favorites" -> {
+                    movieRepository
+                        .observeFavoritesFilters()
+                        .collect { filters ->
+                            setState {
+                                this.copy(
+                                    filters = filters,
+                                )
+                            }
+                        }
+                }
+            }
+
         }
     }
 
@@ -96,16 +129,47 @@ class FiltersViewModel(
         maxYear: Int? = null,
         minRating: Float? = null,
     ) {
-        movieRepository.setFilters(
-            MovieRepository.Filters(
-                genreId = genreId,
-                query = query,
-                minYear = minYear,
-                maxYear = maxYear,
-                minRating = minRating,
-                sortType = _state.value.filters.sortType,
-            )
-        )
+        when(argSource){
+            "main" -> {
+                movieRepository.setFilters(
+                    MovieRepository.Filters(
+                        genreId = genreId,
+                        query = query,
+                        minYear = minYear,
+                        maxYear = maxYear,
+                        minRating = minRating,
+                        sortType = _state.value.filters.sortType,
+                    )
+                )
+            }
+
+            "watchlist" -> {
+                movieRepository.setWatchlistFilters(
+                    MovieRepository.Filters(
+                        genreId = genreId,
+                        query = query,
+                        minYear = minYear,
+                        maxYear = maxYear,
+                        minRating = minRating,
+                        sortType = _state.value.filters.sortType,
+                    )
+                )
+            }
+
+            "favorites" -> {
+                movieRepository.setFavoritesFilters(
+                    MovieRepository.Filters(
+                        genreId = genreId,
+                        query = query,
+                        minYear = minYear,
+                        maxYear = maxYear,
+                        minRating = minRating,
+                        sortType = _state.value.filters.sortType,
+                    )
+                )
+            }
+        }
+
         setEffect(FiltersContract.SideEffect.FiltersApplied)
     }
 }

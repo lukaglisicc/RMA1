@@ -1,8 +1,10 @@
 package com.example.rma1.movies.db
 
 import com.example.rma1.movies.MovieRepository
+import com.example.rma1.movies.db.entities.FavoritesEntity
 import com.example.rma1.movies.db.entities.ImagePathEntity
 import com.example.rma1.movies.db.entities.MovieCastCrossRef
+import com.example.rma1.movies.db.entities.WatchlistEntity
 import com.example.rma1.movies.network.ConfigPair
 import com.example.rma1.movies.network.ImageType
 import com.example.rma1.movies.network.MovieResponse
@@ -23,6 +25,10 @@ class DatabaseMovieRepository(
 
     private val _filters = MutableStateFlow(Filters())
 
+    private val _filtersWatchlist = MutableStateFlow(Filters())
+
+    private val _filtersFavorites = MutableStateFlow(Filters())
+
     private var config: List<ConfigPair>? = null
 
 
@@ -35,6 +41,22 @@ class DatabaseMovieRepository(
             .distinctUntilChanged()
             .map { value -> value.map { it.toRepositoryMovie() } }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun observeWatchlist(): Flow<List<MovieRepository.Movie>> =
+        _filtersWatchlist.flatMapLatest { filters ->
+            appDatabase.movieDao().observeWatchlist(buildWatchlistQuery(filters))
+        }
+            .distinctUntilChanged()
+            .map { value -> value.map { it.toRepositoryMovie() } }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun observeFavorites(): Flow<List<MovieRepository.Movie>> =
+        _filtersFavorites.flatMapLatest { filters ->
+            appDatabase.movieDao().observeFavorites(buildFavoritesQuery(filters))
+        }
+            .distinctUntilChanged()
+            .map { value -> value.map { it.toRepositoryMovie() } }
+
 
     override fun observeMovieDetails(id: String): Flow<MovieRepository.MovieDetails?> =
         appDatabase.movieDao().observeMovieDetails(id)
@@ -43,13 +65,37 @@ class DatabaseMovieRepository(
     override fun observeMovieCount(): Flow<Int> =
         appDatabase.movieDao().observeMovieCount()
 
+    override fun observeWatchlistCount(): Flow<Int> =
+        appDatabase.movieDao().observeWatchlistCount()
+
+    override fun observeFavoritesCount(): Flow<Int> =
+        appDatabase.movieDao().observeFavoritesCount()
+
     override suspend fun setFilters(filters: MovieRepository.Filters) {
         _filters.update { filters.toDatabaseFilters() }
         queryMovies()
     }
 
+    override suspend fun setWatchlistFilters(filters: MovieRepository.Filters) {
+        _filtersWatchlist.update { filters.toDatabaseFilters() }
+        queryMovies()
+    }
+
+    override suspend fun setFavoritesFilters(filters: MovieRepository.Filters) {
+        _filtersFavorites.update { filters.toDatabaseFilters() }
+        queryMovies()
+    }
+
     override fun observeFilters(): Flow<MovieRepository.Filters> {
         return _filters.asStateFlow().map { it.toRepositoryFilters() }
+    }
+
+    override fun observeWatchlistFilters(): Flow<MovieRepository.Filters> {
+        return _filtersWatchlist.asStateFlow().map { it.toRepositoryFilters() }
+    }
+
+    override fun observeFavoritesFilters(): Flow<MovieRepository.Filters> {
+        return _filtersFavorites.asStateFlow().map { it.toRepositoryFilters() }
     }
 
 
@@ -65,6 +111,20 @@ class DatabaseMovieRepository(
                 appDatabase.movieDao().upsertGenres(movie.genres.map { it.toGenreEntity() })
                 appDatabase.movieDao().upsertMoviesGenres(movie.toMoviesGenres())
             }
+    }
+
+    override suspend fun syncWatchlist() {
+        val movies = movieApi.getWatchlist()
+        appDatabase.movieDao().replaceWatchlist(
+            movies.map { WatchlistEntity(it.id) }
+        )
+    }
+
+    override suspend fun syncFavorites() {
+        val movies = movieApi.getFavorites()
+        appDatabase.movieDao().replaceFavorites(
+            movies.map { FavoritesEntity(it.id) }
+        )
     }
 
     override suspend fun refreshMovieDetails(id: String) {

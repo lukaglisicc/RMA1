@@ -69,15 +69,35 @@ interface MovieRepository {
 
     fun observeMovies(): Flow<List<Movie>>
 
+    fun observeWatchlist(): Flow<List<Movie>>
+
+    fun observeFavorites(): Flow<List<Movie>>
+
     fun observeFilters(): Flow<Filters>
+
+    fun observeWatchlistFilters(): Flow<Filters>
+
+    fun observeFavoritesFilters(): Flow<Filters>
 
     fun observeMovieDetails(id: String): Flow<MovieDetails?>
 
     fun observeMovieCount(): Flow<Int>
 
+    fun observeWatchlistCount(): Flow<Int>
+
+    fun observeFavoritesCount(): Flow<Int>
+
     suspend fun setFilters(filters: Filters)
 
+    suspend fun setWatchlistFilters(filters: Filters)
+
+    suspend fun setFavoritesFilters(filters: Filters)
+
     suspend fun queryMovies()
+
+    suspend fun syncWatchlist()
+
+    suspend fun syncFavorites()
 
     suspend fun refreshMovieDetails(id: String)
 
