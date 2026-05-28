@@ -18,11 +18,17 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.outlined.BookmarkBorder
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,6 +48,7 @@ import com.example.rma1.movies.MovieRepository
 import com.example.rma1.views.core.shared.ScreenBase
 import com.example.rma1.views.core.shared.formatBudget
 import com.example.rma1.views.core.shared.truncate
+import okio.IOException
 
 @Composable
 fun MovieDetailsScreen(
@@ -51,6 +58,8 @@ fun MovieDetailsScreen(
     val state by viewModel.state.collectAsState()
 
     val uriHandler = LocalUriHandler.current
+
+    val eventPublisher = viewModel::setEvent
 
 
     LaunchedEffect(viewModel){
@@ -67,7 +76,7 @@ fun MovieDetailsScreen(
 
     MovieDetailsScreen(
         state = state,
-        eventPublisher = viewModel::setEvent,
+        eventPublisher = eventPublisher,
         onClose = onClose,
     )
 }
@@ -95,7 +104,7 @@ private fun MovieDetailsScreen(
             }
         }
 
-        else if (state.error != null) {
+        else if (state.error != null && state.error !is IOException) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -122,6 +131,7 @@ private fun MovieDetailsScreen(
                 movieDetails = state.movieDetails,
                 eventPublisher = eventPublisher,
                 padding = padding,
+                state = state,
             )
         }
     }
@@ -132,7 +142,9 @@ private fun MovieDetailsContent(
     movieDetails: MovieRepository.MovieDetails,
     eventPublisher: (MovieDetailsContract.UiEvent) -> Unit,
     padding: PaddingValues,
+    state: MovieDetailsContract.UiState,
 ) {
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -143,6 +155,7 @@ private fun MovieDetailsContent(
                 posterUrl = movieDetails.posterPath,
                 eventPublisher = eventPublisher,
                 trailerUrl = movieDetails.trailerPath,
+                state = state,
             )
         }
         item { MovieInfoSection(movieDetails) }
@@ -159,6 +172,7 @@ private fun HeroSection(
     posterUrl: String,
     eventPublisher: (MovieDetailsContract.UiEvent) -> Unit,
     trailerUrl: String,
+    state: MovieDetailsContract.UiState,
 ) {
     Box {
         // BACKDROP IMAGE
@@ -185,6 +199,56 @@ private fun HeroSection(
                     )
                 )
         )
+
+        Row(
+            modifier = Modifier
+                .align (Alignment.TopEnd)
+                .padding(horizontal = 16.dp, vertical = 48.dp)
+        ){
+            //watchlist button
+            IconButton(
+                onClick = {
+                    if(state.isInWatchlist){
+                        eventPublisher(MovieDetailsContract.UiEvent.RemoveFromWatchlist)
+                    } else {
+                        eventPublisher(MovieDetailsContract.UiEvent.AddToWatchlist)
+                    }
+                },
+            ) {
+                Icon(
+                    imageVector = if (state.isInWatchlist) {
+                        Icons.Default.Bookmark
+                    } else {
+                        Icons.Outlined.BookmarkBorder
+                    },
+                    contentDescription = "Watchlist",
+                    modifier = Modifier.size(36.dp)
+                )
+            }
+
+            //favorite button
+            IconButton(
+                onClick = {
+                    if(state.isInFavorites){
+                        eventPublisher(MovieDetailsContract.UiEvent.RemoveFromFavorites)
+                    } else {
+                        eventPublisher(MovieDetailsContract.UiEvent.AddToFavorites)
+                    }
+                },
+            ) {
+                Icon(
+                    imageVector = if (state.isInFavorites) {
+                        Icons.Default.Favorite
+                    } else {
+                        Icons.Outlined.FavoriteBorder
+                    },
+                    contentDescription = "Favorite",
+                    tint = if (state.isInFavorites) Color.Red else LocalContentColor.current,
+                    modifier = Modifier.size(36.dp),
+                )
+            }
+        }
+
 
         // play button centered
         FloatingActionButton(

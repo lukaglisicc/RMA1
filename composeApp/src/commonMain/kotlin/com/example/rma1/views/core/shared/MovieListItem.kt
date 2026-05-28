@@ -70,7 +70,7 @@ fun MovieListItem(
         trailingContent = {
             if (onDeleteClick != null){
                 IconButton(
-                    onClick = {},
+                    onClick = onDeleteClick,
                 ){
                     Icon(
                         Icons.Default.Delete,

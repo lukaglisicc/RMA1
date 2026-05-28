@@ -113,7 +113,10 @@ fun FavoritesScreen(
                     items(movies) { movie ->
                         MovieListItem(
                             movie = movie,
-                            onClick = {onMovieClick(movie.id)}
+                            onClick = {onMovieClick(movie.id)},
+                            onDeleteClick = {
+                                eventPublisher(FavoritesContract.UiEvent.RemoveFromFavorites(movie.id))
+                            }
                         )
                     }
                 }

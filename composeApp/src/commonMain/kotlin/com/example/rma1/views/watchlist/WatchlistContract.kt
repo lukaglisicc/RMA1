@@ -17,5 +17,6 @@ interface WatchlistContract {
         data class SortMovies(
             val sortBy: MovieRepository.SortType,
         ) : UiEvent()
+        data class RemoveFromWatchlist(val id: String): UiEvent()
     }
 }

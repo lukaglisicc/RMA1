@@ -102,5 +102,13 @@ interface MovieRepository {
     suspend fun refreshMovieDetails(id: String)
 
     suspend fun getGenres() : List<Genre>
+    suspend fun addToWatchlist(id : String)
+    suspend fun addToFavorites(id : String)
+    suspend fun removeFromWatchlist(id : String)
+    suspend fun removeFromFavorites(id : String)
+    suspend fun observeIsInWatchlist(id : String): Flow<Boolean>
+    suspend fun observeIsInFavorites(id : String): Flow<Boolean>
+    suspend fun isInWatchlist(id : String): Boolean
+    suspend fun isInFavorites(id : String): Boolean
 
 }

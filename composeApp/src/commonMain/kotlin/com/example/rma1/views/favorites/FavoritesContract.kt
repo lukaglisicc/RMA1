@@ -17,5 +17,8 @@ interface FavoritesContract {
         data class SortMovies(
             val sortBy: MovieRepository.SortType,
         ) : UiEvent()
+        data class RemoveFromFavorites(
+            val id: String,
+        ) : UiEvent()
     }
 }

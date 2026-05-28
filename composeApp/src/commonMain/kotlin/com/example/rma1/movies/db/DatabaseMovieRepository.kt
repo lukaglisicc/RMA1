@@ -163,6 +163,42 @@ class DatabaseMovieRepository(
     override suspend fun getGenres(): List<MovieRepository.Genre> =
         appDatabase.movieDao().getGenres().map { it.toRepositoryGenre() }
 
+    override suspend fun addToWatchlist(id: String) {
+        movieApi.addToWatchlist(id)
+        syncWatchlist()
+    }
+
+    override suspend fun addToFavorites(id: String) {
+        movieApi.addFavorite(id)
+        syncFavorites()
+    }
+
+    override suspend fun removeFromWatchlist(id: String) {
+        movieApi.deleteFromWatchlist(id)
+        syncWatchlist()
+    }
+
+    override suspend fun removeFromFavorites(id: String) {
+        movieApi.deleteFavorite(id)
+        syncFavorites()
+    }
+
+    override suspend fun observeIsInWatchlist(id: String): Flow<Boolean> {
+        return appDatabase.movieDao().observeIsInWatchlist(id)
+    }
+
+    override suspend fun observeIsInFavorites(id: String): Flow<Boolean> {
+        return appDatabase.movieDao().observeIsInFavorites(id)
+    }
+
+    override suspend fun isInWatchlist(id: String): Boolean {
+        return appDatabase.movieDao().isInWatchlist(id)
+    }
+
+    override suspend fun isInFavorites(id: String): Boolean {
+        return appDatabase.movieDao().isInFavorites(id)
+    }
+
     private suspend fun getImageUrl(path: String?, quality: Int, imageType: ImageType = ImageType.POSTER): String {
         path ?: return ""
 

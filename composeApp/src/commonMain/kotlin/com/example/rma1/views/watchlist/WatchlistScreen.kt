@@ -113,7 +113,8 @@ fun WatchlistScreen(
                     items(movies) { movie ->
                         MovieListItem(
                             movie = movie,
-                            onClick = {onMovieClick(movie.id)}
+                            onClick = {onMovieClick(movie.id)},
+                            onDeleteClick = {eventPublisher(WatchlistContract.UiEvent.RemoveFromWatchlist(movie.id))}
                         )
                     }
                 }

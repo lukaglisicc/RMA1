@@ -101,13 +101,12 @@ class MovieListViewModel (
         sortType: MovieRepository.SortType,
     ){
         viewModelScope.launch {
-            movieRepository.setFilters(
-                _state.value.filters.copy(
-                    sortType = sortType,
-                )
-            )
             withContext(Dispatchers.IO){
-                runCatching {  movieRepository.queryMovies() }
+                runCatching {  movieRepository.setFilters(
+                    _state.value.filters.copy(
+                        sortType = sortType,
+                    )
+                ) }
                     .onFailure { setState { copy(error = it) } }
             }
         }

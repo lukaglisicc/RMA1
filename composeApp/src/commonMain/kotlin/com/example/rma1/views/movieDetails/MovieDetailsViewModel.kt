@@ -5,12 +5,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.rma1.views.core.movieIdOrThrow
 import com.example.rma1.movies.MovieRepository
+import com.example.rma1.views.movieDetails.MovieDetailsContract.SideEffect.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MovieDetailsViewModel (
     savedStateHandle: SavedStateHandle,
@@ -41,6 +45,8 @@ class MovieDetailsViewModel (
     init {
         observeMovieDetails()
         observeEvents()
+        observeWatchlist()
+        observeFavorites()
         refresh()
     }
 
@@ -58,9 +64,71 @@ class MovieDetailsViewModel (
             events.collect { event ->
                 when(event){
                     is MovieDetailsContract.UiEvent.LaunchTrailer -> {
-                        setEffect(MovieDetailsContract.SideEffect.TrailerLaunched(path = event.path))
+                        setEffect(TrailerLaunched(path = event.path))
+                    }
+
+                    is MovieDetailsContract.UiEvent.AddToFavorites -> {
+                        runCatching {
+                            setState { copy( isInFavorites = true ) }
+                            withContext(Dispatchers.IO){
+                                movieRepository.addToFavorites(argMovieId)
+                            }
+                        }
+                            .onFailure {
+                                favoriteRollback()
+                            }
+                    }
+                    is MovieDetailsContract.UiEvent.AddToWatchlist -> {
+                        runCatching {
+                            setState { copy( isInWatchlist = true ) }
+                            withContext(Dispatchers.IO){
+                                movieRepository.addToWatchlist(argMovieId)
+                            }
+                        }
+                            .onFailure {
+                                watchlistRollback()
+                            }
+                    }
+
+                    is MovieDetailsContract.UiEvent.RemoveFromFavorites -> {
+                        runCatching {
+                            setState { copy( isInFavorites = false ) }
+                            withContext(Dispatchers.IO){
+                                movieRepository.removeFromFavorites(argMovieId)
+                            }
+                        }
+                            .onFailure {
+                                favoriteRollback()
+                            }
+                    }
+                    is MovieDetailsContract.UiEvent.RemoveFromWatchlist -> {
+                        runCatching {
+                            setState { copy( isInWatchlist = false ) }
+                            withContext(Dispatchers.IO){
+                                movieRepository.removeFromWatchlist(argMovieId)
+                            }
+                        }
+                            .onFailure {
+                                watchlistRollback()
+                            }
                     }
                 }
+            }
+        }
+    }
+
+    private fun observeWatchlist(){
+        viewModelScope.launch {
+            movieRepository.observeIsInWatchlist(argMovieId).collect { result ->
+                setState { copy(isInWatchlist = result) }
+            }
+        }
+    }
+
+    private fun observeFavorites(){
+        viewModelScope.launch {
+            movieRepository.observeIsInFavorites(argMovieId).collect { result ->
+                setState { copy(isInFavorites = result) }
             }
         }
     }
@@ -72,10 +140,31 @@ class MovieDetailsViewModel (
                 error = null
             ) }
             runCatching {
-                movieRepository.refreshMovieDetails(argMovieId)
+                withContext(Dispatchers.IO){
+                    movieRepository.refreshMovieDetails(argMovieId)
+                }
             }
                 .onFailure { setState { copy(error = it) } }
             setState { copy(isLoading = false) }
         }
+    }
+
+    private fun favoriteRollback() {
+        viewModelScope.launch (Dispatchers.IO) {
+            val isFavorite = movieRepository.isInFavorites(argMovieId)
+            setState { copy(
+                isInFavorites = isFavorite
+            ) }
+        }
+    }
+
+    private fun watchlistRollback() {
+        viewModelScope.launch (Dispatchers.IO) {
+            val isInWatchlist = movieRepository.isInWatchlist(argMovieId)
+            setState { copy(
+                isInWatchlist = isInWatchlist
+            ) }
+        }
+
     }
 }

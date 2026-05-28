@@ -109,13 +109,16 @@ class FiltersViewModel(
             events.collect { event ->
                 when(event){
                     is FiltersContract.UiEvent.ApplyFilters -> {
-                        applyFilters(
-                            genreId = event.genreId,
-                            query = event.query,
-                            minYear = event.minYear,
-                            maxYear = event.maxYear,
-                            minRating = event.minRating,
-                        )
+                        runCatching {
+                            applyFilters(
+                                genreId = event.genreId,
+                                query = event.query,
+                                minYear = event.minYear,
+                                maxYear = event.maxYear,
+                                minRating = event.minRating,
+                            )
+                        }
+                        setEffect(FiltersContract.SideEffect.FiltersApplied)
                     }
                 }
             }
@@ -169,7 +172,5 @@ class FiltersViewModel(
                 )
             }
         }
-
-        setEffect(FiltersContract.SideEffect.FiltersApplied)
     }
 }

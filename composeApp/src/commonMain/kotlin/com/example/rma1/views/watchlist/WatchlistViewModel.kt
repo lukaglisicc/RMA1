@@ -85,6 +85,14 @@ class WatchlistViewModel(
                     is WatchlistContract.UiEvent.SortMovies -> {
                         sortMovies(event.sortBy)
                     }
+
+                    is WatchlistContract.UiEvent.RemoveFromWatchlist -> {
+                        withContext(Dispatchers.IO){
+                            runCatching{
+                                movieRepository.removeFromWatchlist(event.id)
+                            }
+                        }
+                    }
                 }
             }
         }

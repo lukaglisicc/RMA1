@@ -9,10 +9,16 @@ interface MovieDetailsContract {
         val movieDetails: MovieRepository.MovieDetails? = null,
         val isLoading: Boolean = true,
         val error: Throwable? = null,
+        val isInWatchlist: Boolean = false,
+        val isInFavorites: Boolean = false,
     )
 
     sealed class UiEvent{
         data class LaunchTrailer(val path: String) : UiEvent()
+        data object AddToWatchlist : UiEvent()
+        data object AddToFavorites : UiEvent()
+        data object RemoveFromWatchlist : UiEvent()
+        data object RemoveFromFavorites : UiEvent()
     }
 
     sealed class SideEffect{

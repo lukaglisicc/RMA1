@@ -28,3 +28,5 @@ fun Float.truncate(decimals: Int): Float {
     val factor = 10f.pow(decimals)
     return (this * factor).toInt() / factor
 }
+
+expect fun log(message: String)

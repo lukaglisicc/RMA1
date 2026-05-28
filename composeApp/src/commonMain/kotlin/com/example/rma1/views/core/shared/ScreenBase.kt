@@ -1,7 +1,9 @@
 package com.example.rma1.views.core.shared
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -12,7 +14,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,23 +27,30 @@ fun ScreenBase(
     transparent: Boolean = false,
     content: @Composable (PaddingValues) -> Unit,
 ) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text(title) },
-                navigationIcon = { BackButton(onBack) },
-                colors = if(transparent){
-                    TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.Transparent
-                    )
-                } else {
-                    TopAppBarDefaults.topAppBarColors()
-                }
-            )
+    if(transparent){
+        Box(
+            modifier = Modifier.fillMaxSize()
+        ){
+
+            content(PaddingValues(0.dp))
+
+            BackButton(onBack)
+
         }
-    ) { paddingValues ->
-        content(paddingValues)
+
+    }else{
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text(title) },
+                    navigationIcon = { BackButton(onBack) },
+                )
+            }
+        ) { paddingValues ->
+            content(paddingValues)
+        }
     }
+
 }
 
 @Composable

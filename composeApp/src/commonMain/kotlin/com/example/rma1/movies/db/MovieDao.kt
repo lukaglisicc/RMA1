@@ -104,4 +104,34 @@ interface MovieDao {
         upsertFavorites(favorites)
     }
 
+    @Query("""
+    SELECT EXISTS(
+        SELECT 1 FROM watchlist
+        WHERE id = :movieId
+    )
+""")
+    fun observeIsInWatchlist(movieId: String): Flow<Boolean>
+    @Query("""
+    SELECT EXISTS(
+        SELECT 1 FROM watchlist
+        WHERE id = :movieId
+    )
+""")
+    suspend fun isInWatchlist(movieId: String): Boolean
+
+    @Query("""
+    SELECT EXISTS(
+        SELECT 1 FROM favorites
+        WHERE id = :movieId
+    )
+""")
+    fun observeIsInFavorites(movieId: String): Flow<Boolean>
+    @Query("""
+    SELECT EXISTS(
+        SELECT 1 FROM favorites
+        WHERE id = :movieId
+    )
+""")
+   suspend fun isInFavorites(movieId: String): Boolean
+
 }

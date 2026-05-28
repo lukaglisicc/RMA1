@@ -36,6 +36,7 @@ import com.example.rma1.views.core.shared.FilterButton
 import com.example.rma1.views.core.shared.MovieListItem
 import com.example.rma1.views.core.shared.SortButton
 import kotlinx.coroutines.launch
+import okio.IOException
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -166,7 +167,7 @@ fun MainScreen(
                     }
                 }
 
-                else if (error != null) {
+                else if (error != null && error !is IOException) {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()

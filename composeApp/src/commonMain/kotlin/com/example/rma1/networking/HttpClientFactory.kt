@@ -16,6 +16,7 @@ object HttpClientFactory {
 
 
     fun createHttpClientWithDefaultConfig(
+        connectivityState: ConnectivityState,
         block: HttpClientConfig<*>.() -> Unit = {}
     ): HttpClient {
         return HttpClient {
@@ -41,6 +42,9 @@ object HttpClientFactory {
             install(UserAgent) {
                 agent = UserAgentProvider.USER_AGENT
             }
+
+
+            installNetworkConnectivityPlugin(connectivityState)
 
 
             block.invoke(this)

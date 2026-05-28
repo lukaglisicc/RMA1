@@ -85,6 +85,14 @@ class FavoritesViewModel(
                     is FavoritesContract.UiEvent.SortMovies -> {
                         sortMovies(event.sortBy)
                     }
+
+                    is FavoritesContract.UiEvent.RemoveFromFavorites -> {
+                        withContext(Dispatchers.IO){
+                            runCatching{
+                                movieRepository.removeFromFavorites(event.id)
+                            }
+                        }
+                    }
                 }
             }
         }
