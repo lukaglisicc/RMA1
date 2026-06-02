@@ -26,7 +26,7 @@ fun App() {
 
     val splashViewModel: SplashViewModel = koinViewModel()
     val bootState by splashViewModel.bootState.collectAsState()
-    val authState by splashViewModel.authStore.authState.collectAsState()
+    val authState by splashViewModel.authManager.observeAuthState().collectAsState()
     val isOffline by splashViewModel.isOffline.collectAsState()
 
     val padding = if(isOffline) 30.dp else 0.dp

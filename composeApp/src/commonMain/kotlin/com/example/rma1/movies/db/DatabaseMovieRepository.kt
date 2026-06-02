@@ -185,6 +185,14 @@ class DatabaseMovieRepository(
         return appDatabase.movieDao().isInFavorites(id)
     }
 
+    override suspend fun clearFavorites() {
+        appDatabase.movieDao().clearFavorites()
+    }
+
+    override suspend fun clearWatchlist() {
+        appDatabase.movieDao().clearWatchlist()
+    }
+
     override suspend fun getMovieCache(count: Int, onlyLoaded: Boolean): List<MovieRepository.MovieDetails> {
         if (onlyLoaded){
             return appDatabase.movieDao().getRandomMovieDetails(count).map { it.toRepositoryMovieDetails() }

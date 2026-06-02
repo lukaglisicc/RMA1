@@ -1,6 +1,5 @@
 package com.example.rma1.di
 
-import com.example.rma1.auth.AuthStore
 import com.example.rma1.movies.network.NetworkMovieApi
 import com.example.rma1.networking.Qualifiers
 import com.example.rma1.movies.network.createNetworkMovieApi
@@ -22,9 +21,8 @@ val networkModule = module {
     }
 
     single<HttpClient>(Qualifiers.Authenticated) {
-        val authStoreLazy: Lazy<AuthStore> = inject()
         HttpClientFactory.createHttpClientWithDefaultConfig(connectivityState = get()) {
-            installAuthPlugin(authStoreLazy)
+            installAuthPlugin(get())
         }
     }
 

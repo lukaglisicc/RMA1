@@ -2,7 +2,7 @@ package com.example.rma1.views.signUp
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.rma1.auth.AuthStore
+import com.example.rma1.auth.AuthManager
 import com.example.rma1.movies.network.SignUpInfo
 import com.example.rma1.networking.auth.NetworkAuthApi
 import io.ktor.client.plugins.ResponseException
@@ -18,7 +18,7 @@ import kotlinx.coroutines.withContext
 
 class SignUpViewModel(
     private val authApi: NetworkAuthApi,
-    private val authStore: AuthStore,
+    private val authManager: AuthManager,
 ): ViewModel() {
 
     private val _state = MutableStateFlow(SignUpContract.UiState())
@@ -56,7 +56,7 @@ class SignUpViewModel(
                                     )
                                 }.fold(
                                     onSuccess = {authToken ->
-                                        authStore.setAccessToken(authToken.token)
+                                        authManager.logIn(authToken)
                                         setState { copy(isLoading = false) }
                                     },
                                     onFailure = {error ->

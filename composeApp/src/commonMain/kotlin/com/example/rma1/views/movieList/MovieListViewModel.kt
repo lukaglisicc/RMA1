@@ -2,7 +2,7 @@ package com.example.rma1.views.movieList
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.rma1.auth.AuthStore
+import com.example.rma1.auth.AuthManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
@@ -15,7 +15,7 @@ import kotlinx.coroutines.withContext
 
 class MovieListViewModel (
     private val movieRepository: MovieRepository,
-    private val authStore: AuthStore,
+    private val authManager: AuthManager,
 ) : ViewModel() {
 
     //UI State flow
@@ -89,7 +89,7 @@ class MovieListViewModel (
                         sortMovies(event.sortBy)
                     }
                     is MovieListContract.UiEvent.LogOut -> {
-                        authStore.clearAuthData()
+                        authManager.logOut()
                     }
                 }
             }

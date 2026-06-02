@@ -1,6 +1,6 @@
 package com.example.rma1.networking.auth
 
-import com.example.rma1.auth.AuthStore
+import com.example.rma1.auth.AuthManager
 import com.example.rma1.auth.model.AuthState
 import io.ktor.client.HttpClientConfig
 import io.ktor.client.plugins.api.Send
@@ -11,12 +11,11 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 
 fun HttpClientConfig<*>.installAuthPlugin(
-    authStoreLazy: Lazy<AuthStore>,
+    authManager: AuthManager,
 ) = install(createClientPlugin("AuthPlugin") {
 
     on(SetupRequest) { request ->
-        val authStore = authStoreLazy.value
-        when (val authState = authStore.authState.value) {
+        when (val authState = authManager.getAuthState()) {
             is AuthState.Authenticated -> {
                 request.header(
                     key = HttpHeaders.Authorization,
@@ -35,7 +34,7 @@ fun HttpClientConfig<*>.installAuthPlugin(
                 return@run originalCall
             }
 
-            authStoreLazy.value.clearAuthData()
+            authManager.logOut()
 
             originalCall
         }

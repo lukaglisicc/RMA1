@@ -2,7 +2,7 @@ package com.example.rma1.views.core.splash
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.rma1.auth.AuthStore
+import com.example.rma1.auth.AuthManager
 import com.example.rma1.auth.model.AuthState
 import com.example.rma1.networking.ConnectivityState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,8 +11,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 class SplashViewModel(
-    val authStore: AuthStore,
-    val connectivityState: ConnectivityState,
+    connectivityState: ConnectivityState,
+    val authManager: AuthManager,
 ) : ViewModel() {
 
     private val _bootState = MutableStateFlow<BootState>(BootState.Loading)
@@ -29,7 +29,7 @@ class SplashViewModel(
     private fun checkAuthState() = viewModelScope.launch {
         try {
 
-            val authState = authStore.awaitInitialAuthState()
+            val authState = authManager.awaitInitialAuthState()
 
             _isLoggedIn.value = authState is AuthState.Authenticated
 

@@ -2,7 +2,7 @@ package com.example.rma1.views.logIn
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.rma1.auth.AuthStore
+import com.example.rma1.auth.AuthManager
 import com.example.rma1.movies.network.LogInInfo
 import com.example.rma1.networking.auth.NetworkAuthApi
 import kotlinx.coroutines.Dispatchers
@@ -16,7 +16,7 @@ import kotlinx.coroutines.withContext
 
 class LogInViewModel(
     private val authApi: NetworkAuthApi,
-    private val authStore: AuthStore,
+    private val authManager: AuthManager,
 ): ViewModel() {
 
     private val _state = MutableStateFlow(LogInContract.UiState())
@@ -53,7 +53,7 @@ class LogInViewModel(
                                     )
                                 }.fold(
                                     onSuccess = {authToken ->
-                                        authStore.setAccessToken(authToken.token)
+                                        authManager.logIn(authToken)
                                         setState { copy(isLoading = false) }
                                     },
                                     onFailure = {error ->

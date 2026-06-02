@@ -113,5 +113,7 @@ interface MovieRepository {
     suspend fun isInWatchlist(id : String): Boolean
     suspend fun isInFavorites(id : String): Boolean
     suspend fun getMovieCache(count: Int, onlyLoaded: Boolean = false): List<MovieDetails>
+    suspend fun clearFavorites()
+    suspend fun clearWatchlist()
 
 }

@@ -1,6 +1,7 @@
 package com.example.rma1.di
 
 import androidx.datastore.core.DataStore
+import com.example.rma1.auth.AuthManager
 import com.example.rma1.auth.AuthStore
 import com.example.rma1.auth.createAuthDataStore
 import com.example.rma1.auth.model.AuthData
@@ -11,4 +12,6 @@ val authModule = module {
     single<DataStore<AuthData>> { createAuthDataStore() }
 
     single<AuthStore> { AuthStore(persistence = get()) }
+
+    single<AuthManager> { AuthManager(authStore = get(), movieRepository = inject()) }
 }
