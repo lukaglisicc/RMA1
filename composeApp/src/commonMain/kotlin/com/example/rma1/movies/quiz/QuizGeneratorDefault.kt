@@ -1,7 +1,6 @@
 package com.example.rma1.movies.quiz
 
 import com.example.rma1.movies.MovieRepository
-import com.example.rma1.views.quiz.QuizContract
 
 class QuizGeneratorDefault (
     private val movieRepository: MovieRepository,
@@ -14,7 +13,7 @@ class QuizGeneratorDefault (
     override suspend fun generateQuiz(): Quiz {
         val questions = try {
             generateQuizQuestions(true)
-        } catch (e: QuizContract.NoMoviesException){
+        } catch (e: NoMoviesException){
             generateQuizQuestions(false)
         }
 
@@ -29,7 +28,7 @@ class QuizGeneratorDefault (
         return (correctAnswers.toFloat() * (9f + remainingTime.toFloat() / totalTime.toFloat())).coerceIn(0f, 100f)
     }
 
-    private suspend fun generateQuizQuestions(onlyLoaded: Boolean): List<QuizContract.Question> {
+    private suspend fun generateQuizQuestions(onlyLoaded: Boolean): List<Question> {
 
         loadMovieCache(onlyLoaded)
         questionIndex = 0
@@ -39,19 +38,19 @@ class QuizGeneratorDefault (
 
 
         val counts = mutableMapOf(
-            QuizContract.QuestionType.MOVIE to 0,
-            QuizContract.QuestionType.YEAR to 0,
-            QuizContract.QuestionType.ACTOR to 0,
+            QuestionType.MOVIE to 0,
+            QuestionType.YEAR to 0,
+            QuestionType.ACTOR to 0,
         )
 
-        val selectedTypes = mutableListOf<QuizContract.QuestionType>()
+        val selectedTypes = mutableListOf<QuestionType>()
         val usedMovies = mutableListOf<String>()
 
         repeat(totalQuestions) {
 
             val previous = selectedTypes.lastOrNull()
 
-            val available = QuizContract.QuestionType.entries.filter { type ->
+            val available = QuestionType.entries.filter { type ->
                 counts[type]!! < maxPerType
             }
 
@@ -72,22 +71,22 @@ class QuizGeneratorDefault (
 
             when(type) {
 
-                QuizContract.QuestionType.MOVIE -> {
+                QuestionType.MOVIE -> {
                     generateMovieQuestion(usedMovies)
                 }
 
-                QuizContract.QuestionType.YEAR -> {
+                QuestionType.YEAR -> {
                     generateYearQuestion(usedMovies)
                 }
 
-                QuizContract.QuestionType.ACTOR -> {
+                QuestionType.ACTOR -> {
                     generateActorQuestion(usedMovies)
                 }
             }
         }
     }
 
-    private fun generateMovieQuestion(usedMovies: MutableList<String>): QuizContract.Question.GuessTheMovie {
+    private fun generateMovieQuestion(usedMovies: MutableList<String>): Question.GuessTheMovie {
         while(true){
             val movieDetails =
                 getRandomMovieDetails(usedMovies)
@@ -95,34 +94,34 @@ class QuizGeneratorDefault (
 
 
             val answersIds = mutableListOf(movieDetails.id)
-            val answers = mutableListOf(QuizContract.Answer(movieDetails.title, true))
+            val answers = mutableListOf(Answer(movieDetails.title, true))
             repeat(3){
-                val new = getRandomMovieDetails(answersIds)?: throw QuizContract.NoMoviesException()
+                val new = getRandomMovieDetails(answersIds)?: throw NoMoviesException()
                 answersIds.add(new.id)
-                answers.add(QuizContract.Answer(new.title, false))
+                answers.add(Answer(new.title, false))
             }
             answers.shuffle()
 
             usedMovies.add(movieDetails.id)
 
-            return QuizContract.Question.GuessTheMovie(
+            return Question.GuessTheMovie(
                 picturePath = movieDetails.imagePaths.first(),
                 answers = answers,
                 id = questionIndex++,
             )
         }
-        throw QuizContract.NoMoviesException()
+        throw NoMoviesException()
     }
 
-    private fun generateYearQuestion(usedMovies: MutableList<String>): QuizContract.Question.GuessTheYear {
-        val movieDetails = getRandomMovieDetails(usedMovies)?: throw QuizContract.NoMoviesException()
+    private fun generateYearQuestion(usedMovies: MutableList<String>): Question.GuessTheYear {
+        val movieDetails = getRandomMovieDetails(usedMovies)?: throw NoMoviesException()
         val years = generateNearbyNumbers(movieDetails.year, 10)
-        val answers = years.map { QuizContract.Answer(it.toString(), false) }.toMutableList()
-        answers.add(QuizContract.Answer(movieDetails.year.toString(), true))
+        val answers = years.map { Answer(it.toString(), false) }.toMutableList()
+        answers.add(Answer(movieDetails.year.toString(), true))
         answers.shuffle()
 
         usedMovies.add(movieDetails.id)
-        return QuizContract.Question.GuessTheYear(
+        return Question.GuessTheYear(
             movieName = movieDetails.title,
             picturePath = movieDetails.posterPath,
             answers = answers,
@@ -130,14 +129,14 @@ class QuizGeneratorDefault (
         )
     }
 
-    private fun generateActorQuestion(usedMovies: MutableList<String>): QuizContract.Question.GuessTheActor {
+    private fun generateActorQuestion(usedMovies: MutableList<String>): Question.GuessTheActor {
         val movieDetails =
             getRandomMovieDetails(usedMovies)
-                ?: throw QuizContract.NoMoviesException()
+                ?: throw NoMoviesException()
 
         val correctActor =
             movieDetails.cast.firstOrNull()
-                ?: throw QuizContract.NoMoviesException()
+                ?: throw NoMoviesException()
 
         val usedActors = movieDetails.cast.toSet()
 
@@ -157,13 +156,13 @@ class QuizGeneratorDefault (
             .shuffled()
             .take(3)
 
-        val answers = uniqueWrong.map { QuizContract.Answer(it.name, false) }.toMutableList()
-        answers.add(QuizContract.Answer(correctActor.name, true))
+        val answers = uniqueWrong.map { Answer(it.name, false) }.toMutableList()
+        answers.add(Answer(correctActor.name, true))
         answers.shuffle()
 
         usedMovies.add(movieDetails.id)
 
-        return QuizContract.Question.GuessTheActor(
+        return Question.GuessTheActor(
             movieName = movieDetails.title,
             picturePath = movieDetails.posterPath,
             answers = answers,

@@ -15,7 +15,7 @@ interface QuizContract {
         data object Home: QuizState()
 
         data class InQuiz(
-            val quizState: StateFlow<com.example.rma1.movies.quiz.QuizState>,
+            val quizState: StateFlow<InQuizState>,
         ): QuizState()
 
         data class Report(
@@ -73,7 +73,18 @@ interface QuizContract {
             override val answers: List<Answer>,
             override val isRevealed: Boolean = false,
         ) : Question()
+
+        data class EmptyQuestion(
+            override val id: Int = 0,
+            override val picturePath: String = "",
+            override val answers: List<Answer> = emptyList(),
+            override val isRevealed: Boolean = false,
+        ) : Question()
     }
 
-    class NoMoviesException() : Exception()
+    data class InQuizState(
+        val currentQuestion: Question = Question.EmptyQuestion(),
+        val remainingTime: Int = 0,
+        val progress: Float = 0f,
+    )
 }

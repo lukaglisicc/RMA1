@@ -9,8 +9,11 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 class QuizViewModel (
@@ -60,7 +63,12 @@ class QuizViewModel (
                                     setState { copy(
 
                                         quizState = QuizContract.QuizState.InQuiz(
-                                            quizState = quizAsserted.state
+                                            quizState = quizAsserted.state.map { it.toUiInQuizState() }
+                                                .stateIn(
+                                                    viewModelScope,
+                                                    SharingStarted.WhileSubscribed(5000),
+                                                    QuizContract.InQuizState()
+                                                )
                                         ),
                                         isLoading = false,
                                     ) }
@@ -82,7 +90,7 @@ class QuizViewModel (
 
                     is QuizContract.UiEvent.AnswerSelected -> {
 
-                        quiz?.selectAnswer(event.answer)
+                        quiz?.selectAnswer(event.answer.toModelAnswer())
 
                     }
                 }

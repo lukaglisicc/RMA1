@@ -1,6 +1,6 @@
 package com.example.rma1.movies.quiz
 
-import com.example.rma1.views.quiz.QuizContract
+
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -11,7 +11,7 @@ import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.seconds
 
 class Quiz (
-    private val questions: MutableList<QuizContract.Question>,
+    private val questions: MutableList<Question>,
     private val totalTime: Int,
     private val scoring: (correctAnswers: Int, questionCount: Int, remainingTime: Int, totalTime: Int) -> Float,
 ){
@@ -38,7 +38,7 @@ class Quiz (
         }
     }
 
-    suspend fun selectAnswer(answer: QuizContract.Answer){
+    suspend fun selectAnswer(answer: Answer){
 
         if(questions[currentQuestionIndex].isRevealed) return
 
@@ -104,21 +104,21 @@ class Quiz (
 }
 
 data class QuizState(
-    val currentQuestion: QuizContract.Question,
+    val currentQuestion: Question,
     val remainingTime: Int,
     val progress: Float,
     val isFinished: Boolean,
 )
 
-fun QuizContract.Question.reveal(): QuizContract.Question =
+fun Question.reveal(): Question =
     when (this) {
-        is QuizContract.Question.GuessTheActor ->
+        is Question.GuessTheActor ->
             copy(isRevealed = true)
 
-        is QuizContract.Question.GuessTheMovie ->
+        is Question.GuessTheMovie ->
             copy(isRevealed = true)
 
-        is QuizContract.Question.GuessTheYear ->
+        is Question.GuessTheYear ->
             copy(isRevealed = true)
     }
 
@@ -129,3 +129,46 @@ data class QuizScoring(
     val totalTime: Int,
     val remainingTime: Int,
 )
+
+enum class QuestionType {
+    MOVIE,
+    YEAR,
+    ACTOR
+}
+
+data class Answer(
+    val text: String,
+    val isCorrect: Boolean
+)
+sealed class Question {
+
+    abstract val id: Int
+    abstract val picturePath: String
+    abstract val answers: List<Answer>
+    abstract val isRevealed: Boolean
+
+    data class GuessTheMovie(
+        override val id: Int,
+        override val picturePath: String,
+        override val answers: List<Answer>,
+        override val isRevealed: Boolean = false,
+    ) : Question()
+
+    data class GuessTheYear(
+        override val id: Int,
+        val movieName: String,
+        override val picturePath: String,
+        override val answers: List<Answer>,
+        override val isRevealed: Boolean = false,
+    ) : Question()
+
+    data class GuessTheActor(
+        override val id: Int,
+        val movieName: String,
+        override val picturePath: String,
+        override val answers: List<Answer>,
+        override val isRevealed: Boolean = false,
+    ) : Question()
+}
+
+class NoMoviesException() : Exception()

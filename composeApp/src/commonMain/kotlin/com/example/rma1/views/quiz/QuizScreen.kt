@@ -30,8 +30,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.example.rma1.movies.quiz.NoMoviesException
 import com.example.rma1.views.core.shared.ScreenBase
 import com.example.rma1.views.core.shared.truncate
+import okio.IOException
 
 @Composable
 fun QuizScreen(
@@ -116,10 +118,18 @@ fun QuizScreen(
                     .padding(paddingValues),
                 contentAlignment = Alignment.Center,
             ) {
-                if(state.error is QuizContract.NoMoviesException){
-                    Text(text = "Browse the catalog first to populate your quiz pool.")
-                } else {
-                    Text(text = "Error: ${state.error!!.message}")
+                when (state.error) {
+                    is NoMoviesException -> {
+                        Text(text = "Browse the catalog first to populate your quiz pool.")
+                    }
+
+                    is IOException -> {
+                        Text(text = "Your device is offline, cannot generate quiz.")
+                    }
+
+                    else -> {
+                        Text(text = "Error: ${state.error!!.message}")
+                    }
                 }
 
             }
@@ -253,6 +263,7 @@ private fun QuestionCard(
                     )
                 }
 
+                is QuizContract.Question.EmptyQuestion -> {}
             }
         }
 
