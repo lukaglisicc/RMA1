@@ -47,6 +47,12 @@ interface MovieDao {
         id: String,
     ): Flow<MovieDetailsFull?>
 
+    @Transaction
+    @Query("SELECT * FROM movie_details WHERE movieId IN (:ids)")
+    suspend fun getMovieDetails(
+        ids: List<String>,
+    ): List<MovieDetailsFull>
+
     @Upsert
     suspend fun upsertMovies(movies: List<MovieEntity>)
 
@@ -133,5 +139,20 @@ interface MovieDao {
     )
 """)
    suspend fun isInFavorites(movieId: String): Boolean
+
+    @Query("""
+        SELECT id FROM movies
+        ORDER BY RANDOM()
+        LIMIT (:count)
+    """)
+    suspend fun getRandomMovieIds(count: Int): List<String>
+
+    @Transaction
+    @Query("""
+        SELECT * FROM movie_details
+        ORDER BY RANDOM()
+        LIMIT (:count)
+    """)
+    suspend fun getRandomMovieDetails(count: Int): List<MovieDetailsFull>
 
 }

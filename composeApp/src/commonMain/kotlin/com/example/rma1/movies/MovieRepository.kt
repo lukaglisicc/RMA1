@@ -46,7 +46,9 @@ interface MovieRepository {
     )
 
     data class MovieDetails(
+        val id: String,
         val title: String,
+        val year: Int,
         val desc: String,
         val budget: Int,
         val revenue: Int,
@@ -110,5 +112,6 @@ interface MovieRepository {
     suspend fun observeIsInFavorites(id : String): Flow<Boolean>
     suspend fun isInWatchlist(id : String): Boolean
     suspend fun isInFavorites(id : String): Boolean
+    suspend fun getMovieCache(count: Int, onlyLoaded: Boolean = false): List<MovieDetails>
 
 }

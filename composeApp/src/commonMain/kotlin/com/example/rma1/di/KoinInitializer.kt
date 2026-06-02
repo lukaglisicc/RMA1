@@ -15,6 +15,7 @@ fun initKoin(config: KoinAppDeclaration? = null): KoinApplication {
             networkModule,
             authModule,
             splashModule,
+            quizModule,
         )
     }
 }

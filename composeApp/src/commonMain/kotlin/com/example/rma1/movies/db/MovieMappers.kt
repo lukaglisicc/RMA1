@@ -67,6 +67,7 @@ fun MovieDetails.toMovieDetailsEntity() : MovieDetailsEntity {
     return MovieDetailsEntity(
         movieId = id,
         title = title,
+        year = year,
         desc = desc,
         budget = budget,
         revenue = revenue,
@@ -81,7 +82,9 @@ fun MovieDetails.toMovieDetailsEntity() : MovieDetailsEntity {
 
 fun MovieDetailsFull.toRepositoryMovieDetails() : MovieRepository.MovieDetails {
     return MovieRepository.MovieDetails(
+        id = movieDetails.movieId,
         title = movieDetails.title,
+        year = movieDetails.year,
         desc = movieDetails.desc,
         budget = movieDetails.budget,
         revenue = movieDetails.revenue,

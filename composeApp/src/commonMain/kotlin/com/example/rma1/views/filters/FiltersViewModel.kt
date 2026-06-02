@@ -38,7 +38,6 @@ class FiltersViewModel(
     }
 
     init {
-
         loadGenres()
         observeEvents()
         observeFilters()
@@ -109,6 +108,9 @@ class FiltersViewModel(
             events.collect { event ->
                 when(event){
                     is FiltersContract.UiEvent.ApplyFilters -> {
+                        setState { copy(
+                            isLoading = true,
+                        ) }
                         runCatching {
                             applyFilters(
                                 genreId = event.genreId,

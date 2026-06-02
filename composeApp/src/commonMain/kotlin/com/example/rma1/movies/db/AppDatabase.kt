@@ -28,7 +28,7 @@ import kotlinx.coroutines.IO
         FavoritesEntity::class,
         WatchlistEntity::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = true,
 )
 @ConstructedBy(AppDatabaseConstructor::class)

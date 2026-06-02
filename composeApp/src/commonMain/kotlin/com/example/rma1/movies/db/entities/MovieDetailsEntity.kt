@@ -18,6 +18,7 @@ import androidx.room.PrimaryKey
 data class MovieDetailsEntity (
     @PrimaryKey val movieId: String,
     val title: String,
+    val year: Int,
     val desc: String,
     val budget: Int,
     val revenue: Int,

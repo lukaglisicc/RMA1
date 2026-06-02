@@ -22,6 +22,7 @@ import com.example.rma1.views.core.shared.FilterButton
 import com.example.rma1.views.core.shared.MovieListItem
 import com.example.rma1.views.core.shared.ScreenBase
 import com.example.rma1.views.core.shared.SortButton
+import okio.IOException
 
 @Composable
 fun FavoritesScreen(
@@ -82,7 +83,7 @@ fun FavoritesScreen(
                 }
             }
 
-            else if (error != null) {
+            else if (error != null && error !is IOException) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize(),
