@@ -121,4 +121,5 @@ interface MovieRepository {
     suspend fun clearFavorites()
     suspend fun clearWatchlist()
     suspend fun submitQuizResult(result: QuizResult): Int
+    suspend fun clearQuizResults()
 }

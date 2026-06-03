@@ -213,6 +213,10 @@ class DatabaseMovieRepository(
         return resultResponse.ranking
     }
 
+    override suspend fun clearQuizResults() {
+        appDatabase.movieDao().clearQuizResults()
+    }
+
     override suspend fun getMovieCache(count: Int, onlyLoaded: Boolean): List<MovieRepository.MovieDetails> {
         if (onlyLoaded){
             return appDatabase.movieDao().getRandomMovieDetails(count).map { it.toRepositoryMovieDetails() }

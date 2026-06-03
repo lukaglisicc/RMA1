@@ -159,4 +159,10 @@ interface MovieDao {
     @Upsert
     suspend fun upsertQuizResult(result: QuizResultEntity)
 
+    @Upsert
+    suspend fun upsertQuizResult(results: List<QuizResultEntity>)
+
+    @Query("DELETE FROM quiz_results")
+    suspend fun clearQuizResults()
+
 }

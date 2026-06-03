@@ -16,6 +16,7 @@ class AuthManager(
     suspend fun logOut(){
         movieRepository.value.clearFavorites()
         movieRepository.value.clearWatchlist()
+        movieRepository.value.clearQuizResults()
         authStore.clearAuthData()
     }
 
