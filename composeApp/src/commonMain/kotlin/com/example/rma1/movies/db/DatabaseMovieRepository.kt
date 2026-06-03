@@ -2,6 +2,8 @@ package com.example.rma1.movies.db
 
 import com.example.rma1.movies.MovieRepository
 import com.example.rma1.movies.db.entities.FavoritesEntity
+import com.example.rma1.movies.db.entities.ImagePathEntity
+import com.example.rma1.movies.db.entities.MovieCastCrossRef
 import com.example.rma1.movies.db.entities.WatchlistEntity
 import com.example.rma1.movies.network.ConfigPair
 import com.example.rma1.movies.network.ImageType
@@ -134,16 +136,28 @@ class DatabaseMovieRepository(
                     it.copy(
                         posterPath = getImageUrl(it.posterPath, 2),
                         backdropPath = getImageUrl(it.backdropPath, 2, ImageType.BACKDROP),
-                        trailerPath = movieApi.getMovieTrailers(it.movieId)[0].key,
+                        trailerPath = movieApi.getMovieTrailers(it.movieId).firstOrNull()?.key ?: "",
                     )
                 }
         )
         val cast = movieApi.getMovieCast(id).items.map {
             it.copy(
                 profilePath = getImageUrl(it.profilePath, 1, ImageType.PROFILE)
-            ).toCastEntity()
+            )
         }
-        appDatabase.movieDao().upsertCast(cast)
+        appDatabase.movieDao().upsertCast(cast.map { it.toCastEntity() })
+        appDatabase.movieDao().upsertMovieCast(cast.map {
+            MovieCastCrossRef(id, it.id)
+        })
+        val images = movieApi.getMovieImages(id).backdrops.map {
+            getImageUrl(it.filePath, 0, ImageType.BACKDROP)
+        }
+        appDatabase.movieDao().insertImagePaths(images.map {
+            ImagePathEntity(
+                movieId = id,
+                path = it
+            )
+        })
     }
 
     override suspend fun getGenres(): List<MovieRepository.Genre> =

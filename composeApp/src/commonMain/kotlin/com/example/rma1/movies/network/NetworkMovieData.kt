@@ -72,7 +72,7 @@ data class Cast(
     val id: String,
     val name: String,
     val professions: String,
-    val department: String,
+    val department: String? = null,
     val profilePath: String? = null
 )
 
