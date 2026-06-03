@@ -167,8 +167,16 @@ private fun ReportScreen(
 
 
                     is IOException, is ResponseException -> {
-                        Column {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(paddingValues)
+                                .padding(horizontal = 24.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
                             Text(text = "A network error has occurred, could not save score.")
+                            Text(text = "Correct answers: ${quizState.correctAnswers}/${quizState.questionCount}")
+                            Text(text = "Score: ${quizState.score.truncate(1)}")
 
                             Button(
                                 onClick = { eventPublisher(QuizContract.UiEvent.StartQuiz) },
@@ -204,7 +212,8 @@ private fun ReportScreen(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues),
+                    .padding(paddingValues)
+                    .padding(horizontal = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(text = "Correct answers: ${quizState.correctAnswers}/${quizState.questionCount}")
@@ -308,7 +317,7 @@ private fun QuestionCard(
                         contentDescription = null,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(250.dp)
+                            .weight(1f)
                     )
 
                     Text(
@@ -333,7 +342,7 @@ private fun QuestionCard(
                         contentDescription = null,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(250.dp)
+                            .weight(1f)
                     )
 
                     Text(
@@ -358,7 +367,11 @@ private fun QuestionCard(
         Spacer(modifier = Modifier.height(16.dp))
 
         // Answers
-        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Column(
+            modifier = Modifier
+                .weight(1.5f),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
 
 
             currentQuestion.answers.forEach { answer ->

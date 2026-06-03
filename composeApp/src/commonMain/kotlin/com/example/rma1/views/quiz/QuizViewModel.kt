@@ -164,7 +164,11 @@ class QuizViewModel (
                     setState { copy(
                         error = it,
                         isLoading = false,
-                        quizState = QuizContract.QuizState.Report(),
+                        quizState = QuizContract.QuizState.Report(
+                            correctAnswers = score.correctAnswers,
+                            questionCount = score.questionCount,
+                            score = score.score,
+                        ),
                     ) }
                 },
             )
