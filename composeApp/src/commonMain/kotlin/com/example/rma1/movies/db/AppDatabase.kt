@@ -12,6 +12,7 @@ import com.example.rma1.movies.db.entities.MovieCastCrossRef
 import com.example.rma1.movies.db.entities.MovieDetailsEntity
 import com.example.rma1.movies.db.entities.MovieEntity
 import com.example.rma1.movies.db.entities.MovieGenreCrossRef
+import com.example.rma1.movies.db.entities.QuizResultEntity
 import com.example.rma1.movies.db.entities.WatchlistEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -27,8 +28,9 @@ import kotlinx.coroutines.IO
         MovieGenreCrossRef::class,
         FavoritesEntity::class,
         WatchlistEntity::class,
+        QuizResultEntity::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = true,
 )
 @ConstructedBy(AppDatabaseConstructor::class)

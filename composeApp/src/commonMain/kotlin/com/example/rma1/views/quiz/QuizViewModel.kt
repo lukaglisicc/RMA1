@@ -2,8 +2,10 @@ package com.example.rma1.views.quiz
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.rma1.movies.MovieRepository
 import com.example.rma1.movies.quiz.Quiz
 import com.example.rma1.movies.quiz.QuizGenerator
+import com.example.rma1.movies.quiz.QuizScoring
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.Job
@@ -18,6 +20,7 @@ import kotlinx.coroutines.launch
 
 class QuizViewModel (
     private val quizGenerator: QuizGenerator,
+    private val movieRepository: MovieRepository,
 ): ViewModel() {
 
     private var quiz: Quiz? = null
@@ -116,17 +119,55 @@ class QuizViewModel (
 
                         val score = quiz?.getResults()
 
-                        setState {
-                            copy(
-                                quizState = QuizContract.QuizState.Report(
-                                    correctAnswers = score?.correctAnswers ?: 0,
-                                    questionCount = score?.questionCount ?: 0,
-                                    score = score?.score ?: 0f,
-                                )
-                            )
+                        if (score != null) {
+                            finishQuiz(score)
+                        } else {
+                            setState { copy(
+                                quizState = QuizContract.QuizState.Home,
+                            ) }
                         }
                     }
                 }
+        }
+    }
+
+    private fun finishQuiz(
+        score: QuizScoring,
+    ) {
+        setState { copy(
+            isLoading = true,
+        ) }
+
+        viewModelScope.launch(Dispatchers.IO) {
+            runCatching {
+                movieRepository.submitQuizResult(
+                    MovieRepository.QuizResult(
+                        score = score.score,
+                        category = 1,
+                    )
+                )
+            }.fold(
+                onSuccess = { rank ->
+                    setState {
+                        copy(
+                            quizState = QuizContract.QuizState.Report(
+                                correctAnswers = score.correctAnswers,
+                                questionCount = score.questionCount,
+                                score = score.score,
+                                rank = rank,
+                            ),
+                            isLoading = false,
+                        )
+                    }
+                },
+                onFailure = {
+                    setState { copy(
+                        error = it,
+                        isLoading = false,
+                        quizState = QuizContract.QuizState.Report(),
+                    ) }
+                },
+            )
         }
     }
 

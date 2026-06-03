@@ -22,6 +22,7 @@ interface QuizContract {
             val correctAnswers: Int = 0,
             val questionCount: Int = 0,
             val score: Float = 0f,
+            val rank: Int = 0,
         ): QuizState()
     }
 

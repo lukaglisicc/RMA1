@@ -40,7 +40,8 @@ class Quiz (
 
     suspend fun selectAnswer(answer: Answer){
 
-        if(questions[currentQuestionIndex].isRevealed) return
+        val revealed = questions.getOrNull(currentQuestionIndex)?.isRevealed ?: return
+        if(revealed) return
 
         questions[currentQuestionIndex] = questions[currentQuestionIndex].reveal()
         setState { copy(

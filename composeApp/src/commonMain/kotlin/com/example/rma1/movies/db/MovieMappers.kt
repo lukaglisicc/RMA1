@@ -8,10 +8,13 @@ import com.example.rma1.movies.db.entities.MovieDetailsFull
 import com.example.rma1.movies.db.entities.MovieEntity
 import com.example.rma1.movies.db.entities.MovieGenreCrossRef
 import com.example.rma1.movies.db.entities.MovieWithGenres
+import com.example.rma1.movies.db.entities.QuizResultEntity
 import com.example.rma1.movies.network.Cast
 import com.example.rma1.movies.network.Genre
 import com.example.rma1.movies.network.Movie
 import com.example.rma1.movies.network.MovieDetails
+import com.example.rma1.movies.network.QuizResult
+import com.example.rma1.movies.network.QuizResultFull
 
 fun MovieWithGenres.toRepositoryMovie() : MovieRepository.Movie {
     return MovieRepository.Movie(
@@ -152,5 +155,21 @@ fun Cast.toCastEntity() : CastEntity {
         id = id,
         name = name,
         profilePath = profilePath ?: "",
+    )
+}
+
+fun MovieRepository.QuizResult.toNetworkQuizResult() : QuizResult {
+    return QuizResult(
+        score = score,
+        category = category,
+    )
+}
+
+fun QuizResultFull.toQuizResultEntity() : QuizResultEntity {
+    return QuizResultEntity(
+        score = result.score,
+        category = result.category,
+        timestamp = result.timestamp,
+        ranking = ranking,
     )
 }

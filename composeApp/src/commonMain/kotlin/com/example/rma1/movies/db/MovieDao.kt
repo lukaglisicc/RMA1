@@ -17,6 +17,7 @@ import com.example.rma1.movies.db.entities.MovieDetailsFull
 import com.example.rma1.movies.db.entities.MovieEntity
 import com.example.rma1.movies.db.entities.MovieGenreCrossRef
 import com.example.rma1.movies.db.entities.MovieWithGenres
+import com.example.rma1.movies.db.entities.QuizResultEntity
 import com.example.rma1.movies.db.entities.WatchlistEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -154,5 +155,8 @@ interface MovieDao {
         LIMIT (:count)
     """)
     suspend fun getRandomMovieDetails(count: Int): List<MovieDetailsFull>
+
+    @Upsert
+    suspend fun upsertQuizResult(result: QuizResultEntity)
 
 }

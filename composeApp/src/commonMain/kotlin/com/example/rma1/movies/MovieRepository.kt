@@ -68,6 +68,11 @@ interface MovieRepository {
         val profilePath: String,
     )
 
+    data class QuizResult(
+        val score: Float,
+        val category: Int = 1,
+    )
+
 
     fun observeMovies(): Flow<List<Movie>>
 
@@ -115,5 +120,5 @@ interface MovieRepository {
     suspend fun getMovieCache(count: Int, onlyLoaded: Boolean = false): List<MovieDetails>
     suspend fun clearFavorites()
     suspend fun clearWatchlist()
-
+    suspend fun submitQuizResult(result: QuizResult): Int
 }

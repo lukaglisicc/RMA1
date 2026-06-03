@@ -39,6 +39,7 @@ import com.example.rma1.movies.quiz.NoMoviesException
 import com.example.rma1.views.core.shared.PlatformBackHandler
 import com.example.rma1.views.core.shared.ScreenBase
 import com.example.rma1.views.core.shared.truncate
+import io.ktor.client.plugins.ResponseException
 import okio.IOException
 
 @Composable
@@ -49,75 +50,46 @@ fun QuizScreen(
     val state by viewModel.state.collectAsState()
     val eventPublisher = viewModel::setEvent
 
-    if(state.error == null) {
-        when(val quizState = state.quizState){
-            QuizContract.QuizState.Home -> {
-                ScreenBase(
-                    onBack = onClose,
-                    title = "Quiz",
-                ){ paddingValues ->
-
-                    if(state.isLoading){
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(paddingValues),
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            CircularProgressIndicator()
-                        }
-                    }
-
-                    else{
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier
-                                .padding(paddingValues)
-                                .padding(horizontal = 24.dp)
-                                .fillMaxSize()
-                        ){
-                            Button(
-                                onClick = { eventPublisher(QuizContract.UiEvent.StartQuiz) },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(56.dp),
-                            ) {
-                                Text("Start quiz")
-                            }
-                        }
-                    }
-                }
-            }
-
-            is QuizContract.QuizState.InQuiz -> {
-                MainScreen(
-                    eventPublisher = eventPublisher,
-                    quizState = quizState,
-                )
-            }
-
-            is QuizContract.QuizState.Report -> {
-                ScreenBase(
-                    onBack = onClose,
-                    title = "Quiz",
-                ){ paddingValues ->
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        Text(text = "Correct answers: ${quizState.correctAnswers}/${quizState.questionCount}")
-                        Text(text = "Score: ${quizState.score.truncate(1)}")
-                    }
-                }
-            }
+    when(val quizState = state.quizState){
+        QuizContract.QuizState.Home -> {
+            HomeScreen(
+                eventPublisher = eventPublisher,
+                state = state,
+                onClose = onClose,
+            )
         }
-    } else {
-        ScreenBase(
-            onBack = onClose,
-            title = "Quiz",
-        ) { paddingValues ->
+
+        is QuizContract.QuizState.InQuiz -> {
+            MainScreen(
+                eventPublisher = eventPublisher,
+                quizState = quizState,
+            )
+        }
+
+        is QuizContract.QuizState.Report -> {
+            ReportScreen(
+                eventPublisher = eventPublisher,
+                state = state,
+                onClose = onClose,
+                quizState = quizState,
+            )
+        }
+    }
+
+}
+
+@Composable
+private fun HomeScreen(
+    onClose: () -> Unit,
+    state: QuizContract.UiState,
+    eventPublisher: (QuizContract.UiEvent) -> Unit,
+) {
+    ScreenBase(
+        onBack = onClose,
+        title = "Quiz",
+    ){ paddingValues ->
+
+        if(state.error != null) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -134,14 +106,121 @@ fun QuizScreen(
                     }
 
                     else -> {
-                        Text(text = "Error: ${state.error!!.message}")
+                        Text(text = "Error: ${state.error.message}")
                     }
                 }
+            }
+        }
 
+        else if(state.isLoading){
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+
+        else{
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .padding(paddingValues)
+                    .padding(horizontal = 24.dp)
+                    .fillMaxSize()
+            ){
+                Button(
+                    onClick = { eventPublisher(QuizContract.UiEvent.StartQuiz) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                ) {
+                    Text("Start quiz")
+                }
             }
         }
     }
+}
 
+@Composable
+private fun ReportScreen(
+    onClose: () -> Unit,
+    state: QuizContract.UiState,
+    eventPublisher: (QuizContract.UiEvent) -> Unit,
+    quizState: QuizContract.QuizState.Report,
+) {
+    ScreenBase(
+        onBack = onClose,
+        title = "Quiz",
+    ){ paddingValues ->
+
+        if(state.error != null) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentAlignment = Alignment.Center,
+            ) {
+                when (state.error) {
+
+
+                    is IOException, is ResponseException -> {
+                        Column {
+                            Text(text = "A network error has occurred, could not save score.")
+
+                            Button(
+                                onClick = { eventPublisher(QuizContract.UiEvent.StartQuiz) },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(56.dp),
+                            ) {
+                                Text("Play again")
+                            }
+                        }
+
+                    }
+
+                    else -> {
+                        Text(text = "Error: ${state.error.message}")
+                    }
+                }
+            }
+        }
+
+        else if(state.isLoading){
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+
+        else{
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(text = "Correct answers: ${quizState.correctAnswers}/${quizState.questionCount}")
+                Text(text = "Score: ${quizState.score.truncate(1)}")
+                Text(text = "Global rank: ${quizState.rank}")
+                Button(
+                    onClick = { eventPublisher(QuizContract.UiEvent.StartQuiz) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                ) {
+                    Text("Play again")
+                }
+            }
+        }
+    }
 }
 
 @Composable
@@ -312,7 +391,16 @@ private fun QuestionCard(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp),
-                        colors = if(currentQuestion.isRevealed) ButtonDefaults.buttonColors(containerColor = color) else ButtonDefaults.buttonColors()
+                        colors =
+                            if(currentQuestion.isRevealed)
+                                ButtonDefaults.buttonColors(
+                                containerColor = color,
+                                disabledContainerColor = color,
+                                disabledContentColor = Color.Black,
+                            )
+                            else
+                                ButtonDefaults.buttonColors(),
+                        enabled = !currentQuestion.isRevealed,
                     ) {
                         Text(answer.text)
                     }

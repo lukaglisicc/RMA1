@@ -207,6 +207,12 @@ class DatabaseMovieRepository(
         appDatabase.movieDao().clearWatchlist()
     }
 
+    override suspend fun submitQuizResult(result: MovieRepository.QuizResult) : Int {
+        val resultResponse = movieApi.submitQuizResult(result.toNetworkQuizResult())
+        appDatabase.movieDao().upsertQuizResult(resultResponse.toQuizResultEntity())
+        return resultResponse.ranking
+    }
+
     override suspend fun getMovieCache(count: Int, onlyLoaded: Boolean): List<MovieRepository.MovieDetails> {
         if (onlyLoaded){
             return appDatabase.movieDao().getRandomMovieDetails(count).map { it.toRepositoryMovieDetails() }
