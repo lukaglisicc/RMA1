@@ -45,6 +45,12 @@ class QuizViewModel (
                 when(event){
                     is QuizContract.UiEvent.QuitQuiz -> {
 
+                        quizJob?.cancel()
+                        quiz = null
+
+                        setState { copy(
+                            quizState = QuizContract.QuizState.Home,
+                        ) }
                     }
 
                     is QuizContract.UiEvent.StartQuiz -> {

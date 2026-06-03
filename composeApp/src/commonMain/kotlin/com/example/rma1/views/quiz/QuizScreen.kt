@@ -16,14 +16,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,6 +36,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.example.rma1.movies.quiz.NoMoviesException
+import com.example.rma1.views.core.shared.PlatformBackHandler
 import com.example.rma1.views.core.shared.ScreenBase
 import com.example.rma1.views.core.shared.truncate
 import okio.IOException
@@ -146,6 +152,7 @@ private fun MainScreen(
 
     val state by quizState.quizState.collectAsState()
 
+    ExitDialog(eventPublisher)
 
     Column(
         modifier = Modifier
@@ -189,6 +196,8 @@ private fun QuestionCard(
         verticalArrangement = Arrangement.SpaceBetween,
     ){
         Column(
+            modifier = Modifier
+                .weight(1f),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
 
@@ -201,7 +210,7 @@ private fun QuestionCard(
                         contentDescription = null,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(250.dp)
+                            .weight(1f)
                     )
 
                     Spacer(modifier = Modifier.height(16.dp))
@@ -311,5 +320,49 @@ private fun QuestionCard(
 
             }
         }
+    }
+}
+
+@Composable
+private fun ExitDialog(
+    eventPublisher: (QuizContract.UiEvent) -> Unit,
+) {
+    var showExitDialog by remember { mutableStateOf(false) }
+
+    PlatformBackHandler {
+        showExitDialog = true
+    }
+
+    if (showExitDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showExitDialog = false
+            },
+            title = {
+                Text("Quit quiz?")
+            },
+            text = {
+                Text("Your current progress will be lost.")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showExitDialog = false
+                        eventPublisher(QuizContract.UiEvent.QuitQuiz)
+                    }
+                ) {
+                    Text("Quit")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showExitDialog = false
+                    }
+                ) {
+                    Text("Continue")
+                }
+            }
+        )
     }
 }
