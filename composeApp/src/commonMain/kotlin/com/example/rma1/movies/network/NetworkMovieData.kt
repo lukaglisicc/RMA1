@@ -158,3 +158,8 @@ data class QuizResultFull(
     val result: QuizResultWithTimestamp,
     val ranking: Int,
 )
+
+@Serializable
+data class QuizResponse(
+    val items: List<QuizResultWithTimestamp>
+)

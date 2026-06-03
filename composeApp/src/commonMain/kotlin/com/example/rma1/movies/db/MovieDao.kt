@@ -165,10 +165,16 @@ interface MovieDao {
     @Query("DELETE FROM quiz_results")
     suspend fun clearQuizResults()
 
+    @Transaction
+    suspend fun replaceQuizResults(results: List<QuizResultEntity>){
+        clearQuizResults()
+        upsertQuizResult(results)
+    }
+
     @Query("SELECT COUNT(*) FROM quiz_results")
-    suspend fun getQuizCount(): Int
+    fun observeQuizCount(): Flow<Int>
 
     @Query("SELECT score FROM quiz_results ORDER BY score DESC LIMIT 1")
-    suspend fun getQuizBestScore(): Float
+    fun observeQuizBestScore(): Flow<Float>
 
 }

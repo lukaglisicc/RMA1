@@ -116,6 +116,8 @@ interface MovieRepository {
 
     suspend fun syncFavorites()
 
+    suspend fun syncQuizResults()
+
     suspend fun refreshMovieDetails(id: String)
 
     suspend fun getGenres() : List<Genre>
@@ -132,5 +134,5 @@ interface MovieRepository {
     suspend fun clearWatchlist()
     suspend fun submitQuizResult(result: QuizResult): Int
     suspend fun clearQuizResults()
-    suspend fun getQuizInfo(): QuizInfo
+    suspend fun observeQuizInfo(): Flow<QuizInfo>
 }

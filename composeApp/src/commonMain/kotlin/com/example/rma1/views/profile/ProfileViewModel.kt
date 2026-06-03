@@ -34,7 +34,7 @@ class ProfileViewModel(
 
     init {
         getUserDetails()
-        getQuizInfo()
+        observeQuizInfo()
         observeWatchlistCount()
         observeFavoriteCount()
         observeEvents()
@@ -72,22 +72,23 @@ class ProfileViewModel(
             movieRepository
                 .observeFavoritesCount()
                 .collect { movieCount ->
-                    setState {
-                        this.copy(
+                    setState { copy(
                             favoritesCount = movieCount,
-                        )
-                    }
+                        ) }
                 }
         }
     }
 
-    private fun getQuizInfo() {
-        viewModelScope.launch(Dispatchers.IO) {
-            val quizInfo = movieRepository.getQuizInfo()
-            setState { copy(
-                bestScore = quizInfo.bestScore,
-                quizCount = quizInfo.quizCount,
-            ) }
+    private fun observeQuizInfo() {
+        viewModelScope.launch {
+            movieRepository
+                .observeQuizInfo()
+                .collect { quizInfo ->
+                    setState { copy(
+                        bestScore = quizInfo.bestScore,
+                        quizCount = quizInfo.quizCount,
+                    ) }
+                }
         }
     }
 
@@ -113,6 +114,7 @@ class ProfileViewModel(
                 runCatching {
                     movieRepository.syncWatchlist()
                     movieRepository.syncFavorites()
+                    movieRepository.syncQuizResults()
                 }
                     .onFailure { setState { copy(error = it) } }
             }

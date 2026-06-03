@@ -9,10 +9,12 @@ import com.example.rma1.movies.network.ConfigPair
 import com.example.rma1.movies.network.ImageType
 import com.example.rma1.movies.network.MovieResponse
 import com.example.rma1.movies.network.NetworkMovieApi
+import com.example.rma1.movies.network.QuizResultWithTimestamp
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
@@ -127,6 +129,21 @@ class DatabaseMovieRepository(
         )
     }
 
+    override suspend fun syncQuizResults() {
+        var i = 1
+        val results = mutableListOf<QuizResultWithTimestamp>()
+        while(true){
+            val pageItems = movieApi.getQuizResults(page = i).items
+            if(pageItems.isEmpty())
+                break
+            results.addAll(pageItems)
+            i++
+        }
+        appDatabase.movieDao().replaceQuizResults(
+            results.map { it.toQuizResultEntity() }
+        )
+    }
+
     override suspend fun refreshMovieDetails(id: String) {
         val details = movieApi.getMovieDetails(id)
         appDatabase.movieDao().upsertMovieDetails(
@@ -217,13 +234,18 @@ class DatabaseMovieRepository(
         appDatabase.movieDao().clearQuizResults()
     }
 
-    override suspend fun getQuizInfo(): MovieRepository.QuizInfo {
-        val quizCount = appDatabase.movieDao().getQuizCount()
-        val bestScore = appDatabase.movieDao().getQuizBestScore()
-        return MovieRepository.QuizInfo(
-            bestScore = bestScore,
-            quizCount = quizCount,
-        )
+    override suspend fun observeQuizInfo(): Flow<MovieRepository.QuizInfo> {
+        val quizCountFlow = appDatabase.movieDao().observeQuizCount()
+        val bestScoreFlow = appDatabase.movieDao().observeQuizBestScore()
+        return combine(
+            quizCountFlow,
+            bestScoreFlow,
+        ) { quizCount, bestScore ->
+            MovieRepository.QuizInfo(
+                bestScore = bestScore,
+                quizCount = quizCount,
+            )
+        }
     }
 
     override suspend fun getMovieCache(count: Int, onlyLoaded: Boolean): List<MovieRepository.MovieDetails> {

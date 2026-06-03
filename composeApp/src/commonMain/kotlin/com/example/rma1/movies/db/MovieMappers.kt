@@ -15,6 +15,7 @@ import com.example.rma1.movies.network.Movie
 import com.example.rma1.movies.network.MovieDetails
 import com.example.rma1.movies.network.QuizResult
 import com.example.rma1.movies.network.QuizResultFull
+import com.example.rma1.movies.network.QuizResultWithTimestamp
 
 fun MovieWithGenres.toRepositoryMovie() : MovieRepository.Movie {
     return MovieRepository.Movie(
@@ -171,5 +172,14 @@ fun QuizResultFull.toQuizResultEntity() : QuizResultEntity {
         category = result.category,
         timestamp = result.timestamp,
         ranking = ranking,
+    )
+}
+
+fun QuizResultWithTimestamp.toQuizResultEntity() : QuizResultEntity {
+    return QuizResultEntity(
+        score = score,
+        category = category,
+        timestamp = timestamp,
+        ranking = 0,
     )
 }

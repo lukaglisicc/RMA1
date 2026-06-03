@@ -87,5 +87,8 @@ interface NetworkMovieApi {
     ): QuizResultFull
 
     @GET("/me/quiz-results")
-    suspend fun getQuizResults(): List<QuizResultWithTimestamp>
+    suspend fun getQuizResults(
+        @Query page: Int = 1,
+        @Query("page_size") pageSize: Int = 100,
+    ): QuizResponse
 }
