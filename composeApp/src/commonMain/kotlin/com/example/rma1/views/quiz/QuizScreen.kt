@@ -1,6 +1,9 @@
 package com.example.rma1.views.quiz
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -10,20 +13,34 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Quiz
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -124,26 +141,85 @@ private fun HomeScreen(
         }
 
         else{
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .padding(paddingValues)
-                    .padding(horizontal = 24.dp)
-                    .fillMaxSize()
-            ){
+            HomeScreen(
+                paddingValues = paddingValues,
+                eventPublisher = eventPublisher,
+            )
+        }
+    }
+}
+
+@Composable
+private fun HomeScreen(
+    paddingValues: PaddingValues,
+    eventPublisher: (QuizContract.UiEvent) -> Unit,
+){
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues)
+            .padding(horizontal = 24.dp)
+    ) {
+        ElevatedCard(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Quiz,
+                    contentDescription = null,
+                    modifier = Modifier.size(96.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+
+                Spacer(Modifier.height(24.dp))
+
+                Text(
+                    text = "Movie Quiz",
+                    style = MaterialTheme.typography.headlineMedium
+                )
+
+                Spacer(Modifier.height(8.dp))
+
+                Text(
+                    text = "Test your movie knowledge and compete for the highest score.",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(Modifier.height(40.dp))
+
                 Button(
-                    onClick = { eventPublisher(QuizContract.UiEvent.StartQuiz) },
+                    onClick = {
+                        eventPublisher(QuizContract.UiEvent.StartQuiz)
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(56.dp),
+                        .height(56.dp)
                 ) {
-                    Text("Start quiz")
+                    Icon(
+                        Icons.Default.PlayArrow,
+                        contentDescription = null
+                    )
+
+                    Spacer(Modifier.width(8.dp))
+
+                    Text(
+                        text = "Start Quiz",
+                        style = MaterialTheme.typography.titleMedium
+                    )
                 }
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun ReportScreen(
     onClose: () -> Unit,
@@ -167,27 +243,20 @@ private fun ReportScreen(
 
 
                     is IOException, is ResponseException -> {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(paddingValues)
-                                .padding(horizontal = 24.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.TopCenter,
                         ) {
-                            Text(text = "A network error has occurred, could not save score.")
-                            Text(text = "Correct answers: ${quizState.correctAnswers}/${quizState.questionCount}")
-                            Text(text = "Score: ${quizState.score.truncate(1)}")
-
-                            Button(
-                                onClick = { eventPublisher(QuizContract.UiEvent.StartQuiz) },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(56.dp),
-                            ) {
-                                Text("Play again")
-                            }
+                            Text(
+                                text = "A network error has occurred, score couldn't be saved.",
+                                style = MaterialTheme.typography.bodyMediumEmphasized
+                            )
                         }
-
+                        ReportScreen(
+                            paddingValues = paddingValues,
+                            quizState = quizState,
+                            eventPublisher = eventPublisher,
+                        )
                     }
 
                     else -> {
@@ -209,25 +278,131 @@ private fun ReportScreen(
         }
 
         else{
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(horizontal = 24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
+            ReportScreen(
+                paddingValues = paddingValues,
+                quizState = quizState,
+                eventPublisher = eventPublisher,
+            )
+        }
+    }
+}
+
+@Composable
+private fun ReportScreen(
+    paddingValues: PaddingValues,
+    quizState: QuizContract.QuizState.Report,
+    eventPublisher: (QuizContract.UiEvent) -> Unit
+) {
+
+    val score = remember { Animatable(0f) }
+
+    LaunchedEffect(quizState) {
+        score.snapTo(0f)
+        score.animateTo(
+            quizState.score,
+            tween(1000)
+        )
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues)
+            .padding(24.dp)
+    ) {
+        Column(
+            modifier = Modifier.align(Alignment.Center),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+
+            Icon(
+                imageVector = Icons.Default.Star,
+                contentDescription = null,
+                modifier = Modifier.size(96.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+
+            Spacer(Modifier.height(16.dp))
+
+            Text(
+                text = "Quiz Complete!",
+                style = MaterialTheme.typography.headlineMedium
+            )
+
+            Spacer(Modifier.height(8.dp))
+
+            Text(
+                text = score.value.truncate(1).toString(),
+                style = MaterialTheme.typography.displayLarge,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            Text(
+                text = "Final Score",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            Spacer(Modifier.height(32.dp))
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text(text = "Correct answers: ${quizState.correctAnswers}/${quizState.questionCount}")
-                Text(text = "Score: ${quizState.score.truncate(1)}")
-                Text(text = "Global rank: ${quizState.rank}")
-                Button(
-                    onClick = { eventPublisher(QuizContract.UiEvent.StartQuiz) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                ) {
-                    Text("Play again")
-                }
+                ResultCard(
+                    title = "Correct",
+                    value = "${quizState.correctAnswers}/${quizState.questionCount}",
+                    modifier = Modifier.weight(1f)
+                )
+
+                ResultCard(
+                    title = "Rank",
+                    value = "#${quizState.rank}",
+                    modifier = Modifier.weight(1f)
+                )
             }
+
+            Spacer(Modifier.height(40.dp))
+
+            Button(
+                onClick = { eventPublisher(QuizContract.UiEvent.StartQuiz) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+            ) {
+                Icon(
+                    Icons.Default.Refresh,
+                    contentDescription = null
+                )
+
+                Spacer(Modifier.width(8.dp))
+
+                Text("Play Again")
+            }
+        }
+    }
+}
+
+@Composable
+private fun ResultCard(
+    title: String,
+    value: String,
+    modifier: Modifier = Modifier
+) {
+    ElevatedCard(modifier = modifier) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = value,
+                style = MaterialTheme.typography.headlineSmall
+            )
+
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
@@ -253,6 +428,11 @@ private fun MainScreen(
             text = "${state.remainingTime}s",
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
+
+        QuizProgressBar(
+            progress = state.progress,
+            modifier = Modifier.padding(horizontal = 24.dp),
         )
 
         AnimatedContent(
@@ -466,4 +646,24 @@ private fun ExitDialog(
             }
         )
     }
+}
+
+@Composable
+private fun QuizProgressBar(
+    progress: Float,
+    modifier: Modifier = Modifier,
+) {
+    val animatedProgress by animateFloatAsState(
+        targetValue = progress.coerceIn(0f, 1f),
+        animationSpec = tween(
+            durationMillis = 500,
+            easing = FastOutSlowInEasing
+        ),
+        label = "quiz_progress"
+    )
+
+    LinearProgressIndicator(
+        progress = { animatedProgress },
+        modifier = modifier.fillMaxWidth()
+    )
 }

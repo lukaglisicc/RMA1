@@ -22,7 +22,7 @@ class Quiz (
     private val _state = MutableStateFlow(QuizState(
         currentQuestion = questions.first(),
         remainingTime = totalTime,
-        progress = 1f / questionCount.toFloat(),
+        progress = 0f,
         isFinished = false,
     ))
     val state = _state.asStateFlow()
@@ -46,7 +46,7 @@ class Quiz (
         questions[currentQuestionIndex] = questions[currentQuestionIndex].reveal()
         setState { copy(
             currentQuestion = questions[currentQuestionIndex],
-            progress = (currentQuestionIndex + 2) / questionCount.toFloat()
+            progress = (currentQuestionIndex + 1) / questionCount.toFloat()
         ) }
 
 
