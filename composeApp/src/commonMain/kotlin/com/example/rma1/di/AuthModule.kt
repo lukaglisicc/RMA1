@@ -13,5 +13,5 @@ val authModule = module {
 
     single<AuthStore> { AuthStore(persistence = get()) }
 
-    single<AuthManager> { AuthManager(authStore = get(), movieRepository = inject()) }
+    single<AuthManager> { AuthManager(authStore = get(), movieRepository = inject(), movieApi = inject()) }
 }

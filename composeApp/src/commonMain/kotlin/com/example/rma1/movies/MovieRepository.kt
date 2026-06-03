@@ -73,6 +73,16 @@ interface MovieRepository {
         val category: Int = 1,
     )
 
+    data class User(
+        val username: String,
+        val realName: String,
+    )
+
+    data class QuizInfo(
+        val bestScore: Float,
+        val quizCount: Int,
+    )
+
 
     fun observeMovies(): Flow<List<Movie>>
 
@@ -122,4 +132,5 @@ interface MovieRepository {
     suspend fun clearWatchlist()
     suspend fun submitQuizResult(result: QuizResult): Int
     suspend fun clearQuizResults()
+    suspend fun getQuizInfo(): QuizInfo
 }

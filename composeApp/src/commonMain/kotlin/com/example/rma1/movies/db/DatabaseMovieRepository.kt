@@ -217,6 +217,15 @@ class DatabaseMovieRepository(
         appDatabase.movieDao().clearQuizResults()
     }
 
+    override suspend fun getQuizInfo(): MovieRepository.QuizInfo {
+        val quizCount = appDatabase.movieDao().getQuizCount()
+        val bestScore = appDatabase.movieDao().getQuizBestScore()
+        return MovieRepository.QuizInfo(
+            bestScore = bestScore,
+            quizCount = quizCount,
+        )
+    }
+
     override suspend fun getMovieCache(count: Int, onlyLoaded: Boolean): List<MovieRepository.MovieDetails> {
         if (onlyLoaded){
             return appDatabase.movieDao().getRandomMovieDetails(count).map { it.toRepositoryMovieDetails() }

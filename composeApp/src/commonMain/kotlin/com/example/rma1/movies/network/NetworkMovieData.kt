@@ -120,6 +120,8 @@ data class LogInInfo(
 @Serializable
 data class User(
     val username: String,
+    @SerialName("full_name")
+    val realName: String,
 )
 
 @Serializable

@@ -165,4 +165,10 @@ interface MovieDao {
     @Query("DELETE FROM quiz_results")
     suspend fun clearQuizResults()
 
+    @Query("SELECT COUNT(*) FROM quiz_results")
+    suspend fun getQuizCount(): Int
+
+    @Query("SELECT score FROM quiz_results ORDER BY score DESC LIMIT 1")
+    suspend fun getQuizBestScore(): Float
+
 }

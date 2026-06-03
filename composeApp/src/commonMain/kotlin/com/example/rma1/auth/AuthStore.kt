@@ -38,6 +38,14 @@ class AuthStore(
             it.copy(accessToken = accessToken)
         }
 
+    suspend fun setUser(username: String, realName: String) =
+        persistence.updateData {
+            it.copy(
+                username = username,
+                realName = realName,
+            )
+        }
+
     suspend fun clearAuthData() =
         persistence.updateData { AuthData.empty() }
 
