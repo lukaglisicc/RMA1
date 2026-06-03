@@ -36,6 +36,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.rma1.views.core.shared.ScreenBase
+import okio.IOException
 
 @Composable
 fun SignUpScreen(
@@ -51,14 +52,14 @@ fun SignUpScreen(
         onBack = onBackClick,
     ) { padding ->
 
-        if (state.error != null) {
+        if (state.error != null && state.error !is IOException) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding),
                 contentAlignment = Alignment.Center,
             ) {
-                Text(text = "Error: ${state.error!!.message}")
+                Text(text = "Error: ${state.error?.message}")
             }
         }
 
@@ -185,6 +186,14 @@ private fun MainScreen(
                 }
             }
         )
+
+        if(state.error is IOException){
+            Text(
+                text = "Network error, couldn't register an account.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
 
         Spacer(modifier = Modifier.height(24.dp))
 

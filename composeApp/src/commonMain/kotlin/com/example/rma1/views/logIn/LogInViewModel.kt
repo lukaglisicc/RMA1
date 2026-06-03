@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.rma1.auth.AuthManager
 import com.example.rma1.movies.network.LogInInfo
 import com.example.rma1.networking.auth.NetworkAuthApi
+import io.ktor.client.plugins.ResponseException
+import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -13,6 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okio.IOException
 
 class LogInViewModel(
     private val authApi: NetworkAuthApi,
@@ -57,11 +60,32 @@ class LogInViewModel(
                                         setState { copy(isLoading = false) }
                                     },
                                     onFailure = {error ->
-                                        setState { copy(
-                                            isLoading = false,
-                                            usernameError = "",
-                                            passwordError = "Invalid username or password",
-                                        ) }
+                                        when(error){
+                                            is ResponseException -> {
+
+                                                if(error.response.status == HttpStatusCode.Unauthorized){
+                                                    setState { copy(
+                                                        isLoading = false,
+                                                        usernameError = "",
+                                                        passwordError = "Invalid username or password",
+                                                    ) }
+                                                }
+
+                                                else {
+                                                    setState { copy(
+                                                        isLoading = false,
+                                                        error = error,
+                                                    ) }
+                                                }
+                                            }
+
+                                            else -> {
+                                                setState { copy(
+                                                    isLoading = false,
+                                                    error = error,
+                                                ) }
+                                            }
+                                        }
                                     },
                                 )
                             }
